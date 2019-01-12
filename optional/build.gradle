@@ -9,7 +9,7 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility=JavaVersion.VERSION_HIGHER
+sourceCompatibility=JavaVersion.VERSION_11
 
 dependencies {
     compile group: 'junit', name: 'junit', version: '4.12'
