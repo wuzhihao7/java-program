@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+}
+
+group 'com.house'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_HIGHER
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
