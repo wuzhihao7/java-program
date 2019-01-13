@@ -2,6 +2,20 @@
 
 ## lambda
 
+### 用法
+
+```java
+    @FunctionalInterface
+    interface Hello{
+        void say(String msg);
+    }
+    @Test
+    public void testLambda(){
+        Hello say = x -> System.out.println(x);
+        say.say("你好");
+    }
+```
+
 ### 四大核心函数型接口
 
 1. 消费型接口（有参无返回值）
@@ -55,6 +69,8 @@ public interface Predicate<T>{
 ```
 
 ## stream
+
+### 简介
 
 1. Stream 不是集合元素，它不是数据结构并不保存数据，它是有关算法和计算的，它更像一个高级版本的 Iterator。简单来说，它的作用就是通过一系列操作将数据源（集合、数组）转化为想要的结果。  
 
@@ -181,5 +197,29 @@ collect（收集）：将流转换为其他形式。需要Collectors类的一些
         Optional<Integer> integer = list.stream()
                 .collect(Collectors.maxBy(Integer::compare));
         System.out.println(integer.get());
+```
+
+### 基本操作
+
+```java
+List<String> streams = Arrays.asList("a", "b", "c", "d");
+streams.stream().filter(s -> s.startsWith("c")).map(String::toUpperCase).sorted().forEach(System.out::println);//A,B,C,D
+```
+
+1. 顺序流
+
+```java
+Arrays.asList("a1","a2","a3").stream().findFirst().ifPresent(System.out::println);//a1
+Stream.of("a1","a2","a3").findFirst().ifPresent(System.out::println);//a1
+```
+
+2. 原始流
+
+```java
+IntStream.range(0,4).forEach(System.out::print);//0123
+System.out.println();
+LongStream.range(0L,4L).forEach(System.out::print);//0123
+System.out.println();
+Arrays.stream(new int[]{1,2,3}).average().ifPresent(System.out::println);//2.0
 ```
 
