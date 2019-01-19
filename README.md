@@ -1,1 +1,1 @@
-# java-program
+# java-samples
