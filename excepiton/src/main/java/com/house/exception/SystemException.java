@@ -79,7 +79,7 @@ public class SystemException extends RuntimeException {
      * @param errorCode 错误码
      */
     public SystemException(ErrorCode errorCode) {
-        this(null, null, errorCode);
+        this.errorCode = errorCode;
     }
 
     /**
@@ -89,7 +89,8 @@ public class SystemException extends RuntimeException {
      * @param errorCode 错误码
      */
     public SystemException(String message, ErrorCode errorCode) {
-        this(message, null, errorCode);
+        super(message);
+        this.errorCode = errorCode;
     }
 
     /**
@@ -99,7 +100,8 @@ public class SystemException extends RuntimeException {
      * @param errorCode 错误码
      */
     public SystemException(Throwable cause, ErrorCode errorCode) {
-        this(null, cause, errorCode);
+        super(cause);
+        this.errorCode = errorCode;
     }
 
     /**
