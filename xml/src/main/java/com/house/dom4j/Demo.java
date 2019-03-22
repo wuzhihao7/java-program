@@ -31,7 +31,7 @@ public class Demo {
                     if ("TypeName".equals(name)) {
                         typeName = text;
                     } else {
-                        if (text != null && !"".equals(text)) {
+                        if (text != null && !"".equals(text) && !"PUSHTIME".equals(text)) {
                             System.out.println(String.format("push.formatter.%s.%s=%s",typeName, name, text));
                         }
                     }
