@@ -201,20 +201,377 @@ Java NIO的通道类似流，但又有些不同：
 - 通道可以异步地读写。
 - 通道中的数据总是要读到一个Buffer，或者总是从一个Buffer中写入。
 
-> Channel的实现
+![img](https://oscimg.oschina.net/oscnet/a794435a095b75a9c5f86321bbbc1e9a273.jpg)
 
-这些是Java NIO中最重要的通道的实现：
+在Java NIO中，通道是用于在实体和字节缓冲区之间有效传输数据的介质。它从一个实体读取数据，并将其放在缓冲区块中以供消费。
 
-- FileChannel
-- DatagramChannel
-- SocketChannel
-- ServerSocketChannel
+通道作为Java NIO提供的网关来访问I/O机制。 通常，通道与操作系统文件描述符具有一对一关系，用于提供平台独立操作功能。
 
-FileChannel从文件读写数据。
+### NIO通道基础
 
-SocketChannel能通过TCP读写网络中的数据。
+通道实现是使用本地代码执行实际操作。通道接口允许我们以便捷和受控的方式访问低级IO服务。
 
-ServerSocketChannel可以监听新进来的TCP连接，像Web服务器那样，对每个新进来的连接都会创建一个SocketChannel。
+在层次结构的顶部，通道接口如下所示：
 
-> 基本的Channel示例
+```java
+package java.nio.channels;  
+ public interface Channel{  
+    public boolean isclose();  
+    public void Open() throws IOException;  
+}
+```
+
+所有通道只有两个常用操作：
+
+- 检查通道是否关闭(isclose())
+- 关闭通道(close())
+
+### 通道实现
+
+在Java NIO中，主要使用的通道如下：
+
+- `FileChannel`：文件通道用于从文件读取数据。它只能通过调用`getChannel()`方式来创建对象。不能直接创建`FileChannel`对象。
+
+```java
+FileInputStream fis = new FileInputStream(filename);
+FileChannel channel = fis.getChannel();
+```
+
+- `DatagramChannel`：数据报通道可以通过UDP(用户数据报协议)通过网络读取和写入数据。它使用工厂方法来创建对象。
+
+```java
+DatagramChannel ch = DatagramChannel.open();
+DatagramChannel ch = DatagramChannel.close();
+```
+
+- `SocketChannel`：数据报通道可以通过TCP(传输控制协议)通过网络读取和写入数据。它使用工厂方法来创建对象。
+
+```java
+SocketChannel ch = SocketChannel.open();  
+ch.connect(new InetSocketAddress("somehost", someport));
+
+SocketChannel ch = SocketChannel.close();
+ch.connect(new InetSocketAddress("somehost", someport));
+```
+
+- `ServerSocketChannel`：ServerSocketChannel允许用户监听传入的TCP连接，与WEB服务器相同。对于每个传入连接，都会为连接创建一个SocketChannel。
+
+```java
+ServerSocketChannel ch = ServerSocketChannel.open();
+ch.socket().bind(new InetSocketAddress(port));
+
+ServerSocketChannel ch = ServerSocketChannel.open();
+ch.socket().bind(new InetSocketAddress(port));
+```
+
+### 创建
+
+无法直接打开一个FileChannel，需要通过InputStream、OutputStream或RandomAccessFile的getChannel方法来获取一个FileChannel实例
+
+FileChannel常用方法：
+
+- **read(ByteBuffer)**：从文件通道读取数据到Buffer，-1表示已经到达输入的末尾
+
+- **write(ByteBuffer)**：从字节缓冲区写到文件通道
+
+- **close()**：关闭
+
+- **transferFrom()**：将数据从源通道传输到FileChannel中
+
+  ```java
+  toChannel.transferFrom(position, count, fromChannel);
+  ```
+
+- **transferTo()**：将数据从FileChannel传输到其他的channel中
+
+  ```java
+  fromChannel.transferTo(position, count, toChannel);
+  ```
+
+- **position()**：获取当前位置
+
+- **position(int)**：设置当前位置
+
+- **size()**：返回该实例所关联的文件的大小
+
+- **truncate(int)**：截取文件的前int个字节
+
+- **force(boolean)**：将通道里尚未写入磁盘的内存缓存数据强制写到磁盘上，boolean指明是否同时将文件元数据（权限信息等）写到磁盘上
+
+### 示例
+
+> **FileChannel**
+
+```java
+            try(RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\nio-data.txt", "r")){
+            //利用channel中的FileChannel来实现文件读取
+            FileChannel channel = file.getChannel();
+            //设置缓冲区容量
+            ByteBuffer byteBuffer = ByteBuffer.allocate(10);
+            //从通道中读取数据到缓冲区，返回读取的字节数量
+            int read = channel.read(byteBuffer);
+            //数量为-1表示读取完毕
+            while (read != -1) {
+                //切换模式为读模式，其实就是把position的位置设置为0，可以从0开始读取
+                byteBuffer.flip();
+                //如果缓冲区还有数据
+                while (byteBuffer.hasRemaining()) {
+                    //输出一个字符
+                    System.out.print((char) byteBuffer.get());
+                }
+                //数据读取完毕后清空缓冲区
+                byteBuffer.clear();
+                //继续把通道内剩余数据写入缓冲区
+                read = channel.read(byteBuffer);
+            }
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+```
+
+> 文件拷贝
+
+```java
+package com.house.channel;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+
+/**
+ * @author wuzhihao
+ * @version V1.0
+ * @since 2019/3/23
+ */
+public class FileCopyDemo {
+    public static void main(String[] args) {
+        try (
+                FileInputStream fis = new FileInputStream("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\nio-data.txt");
+                FileOutputStream fos = new FileOutputStream("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\nio-data-output.txt")
+        ){
+            FileChannel fisChannel = fis.getChannel();
+            FileChannel fosChannel = fos.getChannel();
+            copy(fisChannel, fosChannel);
+            System.out.println("done.");
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void copy(FileChannel fisChannel, FileChannel fosChannel) {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        int read = -1;
+        try {
+            read = fisChannel.read(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        while (read != -1){
+            //the buffer is used to drained
+            buffer.flip();
+            //keep sure that buffer was fully drained
+            while (buffer.hasRemaining()){
+                try {
+                    fosChannel.write(buffer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            // Now the buffer is empty, ready for the filling
+            buffer.clear();
+            try {
+                read = fisChannel.read(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+## Buffer
+
+缓冲区本质上是一块可以写入数据，然后可以从中读取数据的内存。这块内存被包装成NIO Buffer对象，并提供了一组方法，用来方便的访问该块内存。
+
+它定义了所有缓冲区通用的核心功能：限制，容量和当前位置。
+
+Java NIO缓冲区用于与NIO通道进行交互。这是写入数据的内存块，以便在稍后再次进行读取。
+
+### Buffer的主要属性
+
+| 属性     |                  ##功能                  |
+| -------- | :--------------------------------------: |
+| capacity |                   容量                   |
+| position | 缓冲区当前位置指针，最大可为capacity – 1 |
+| limit    |         缓冲区最大读取和写入限制         |
+
+### Buffer属性示意图
+
+![img](https://oscimg.oschina.net/oscnet/3223ca81b3f2d27e527caa8f672b4953e41.jpg)
+
+上图展示了写模式和读模式下，以上属性的示意图。写模式下，limit和capacity是一样的，这表示你能写入的最大容量数据。在读模式下，limit会和position一样，表示你能读到写入的全部数据。
+
+### 缓冲区类型
+
+对于每个原始类型，都有一个缓冲区类型，所有缓冲区都可以实现缓冲区接口。大多数使用的缓冲区类型是ByteBuffer。
+
+在Java NIO中使用的核心缓冲区如下:
+
+- CharBuffer
+
+- DoubleBuffer
+
+- IntBuffer
+
+- LongBuffer
+
+- ByteBuffer
+
+- ShortBuffer
+
+- FloatBuffer
+
+  上述缓冲区覆盖了我们可以通过IO发送的基本数据类型：`characters`、`double`、`int`、`long`、`byte`、`short`和`float`。
+
+  在NIO中，使用`java.nio.Buffer`类中实现的缓冲区进行数据传输。它与数组类似，具有固定的容量大小。
+
+![img](http://www.yiibai.com/uploads/images/201709/2809/124090952_19645.png)
+
+### 分配缓冲区
+
+为了获得缓冲区对象，我们必须首先分配一个缓冲区。在每个`Buffer`类中，`allocate()`方法用于分配缓冲区。
+
+```java
+//ByteBuffer分配容量为28字节
+ByteBuffer buf = ByteBuffer.allocate(28);
+//CharBuffer分配空间为2048个字符
+CharBuffer buf = CharBuffer.allocate(2048);
+```
+
+### 从缓冲区读取数据
+
+从缓冲区读取数据有两种方法：
+
+- 通过使用`get()`方法之一读取`Buffer`中的数据。
+
+  ```java
+  byte aByte = buf.get();
+  ```
+
+- 将数据从缓冲区读入通道
+
+  ```java
+  int bytesWritten = inChannel.write(buf);
+  ```
+
+###  将数据写入缓冲区
+
+将数据写入缓冲区有两种方法：
+
+- 使用`put()`方法将数据写入缓冲区
+- 将数据从通道写入缓冲区
+
+### 使用步骤
+
+1. 写入数据到Buffer
+2. 调用`flip()`方法调整指针位置准备读取
+3. 从Buffer中读取数据
+4. 调用`clear()`方法或者`compact`方法清理缓存
+
+### 主要属性值
+
+- **capacity**：Buffer缓冲区大小，只能写入capacity个原始类型。不会改变。
+- **position**：下一个要被读写的数据索引。
+- **limit**：第一个不被读写的数据的索引位置，通常就是缓冲区中实际数据的字节数
+
+### 主要方法
+
+- **flip()**：反转缓冲区，将limit的值设为position的值，然后position的值设为0。为从缓冲区读取字节做准备
+- **rewind()**：从头再读或再写，limit不变，position的设置为0。
+- **mark()**：标记当前的position的值，和reset()配合使用
+- **reset()**：将当前position设为mark标记的值
+- **hasRemaining()**：position和limit之间是否还有元素。
+- **clear()**：清空整个缓冲区（没有擦除）。未读数据复制到缓冲区的起始处，position设到最后一个未读数据后。
+
+### 比较
+
+> **equals()**
+
+当满足下列条件时，表示两个Buffer相等：
+
+1. 有相同的类型(byte、char、int等)
+2. Buffer中剩余的byte、char等的个数相等
+3. Buffer中所有剩余的byte、char等都相等
+
+> **compareTo()**
+
+比较两个同类型Buffer的剩余元数，如果满足下列条件，则认为一个Buffer小于另一个Buffer：
+
+1. 第一个不相等的元素小于另一个Buffer中对应的元素
+2. 所有元素都相等，但第一个Buffer比另一个Buffer先耗尽（第一个Buffer的元素个数比另一个少）
+
+### ByteBuffer
+
+ByteBuffer是唯一直接与通道交换的缓冲器。
+
+静态方法：
+
+- **ByteBuffer wrap(Byte[] array)**：使用”支持“数组初始化一个ByteBuffer，数组和缓存的数据相互关联。
+
+实例方法：
+
+- **asXXBuffer系列方法**：可以获得特定基本数据类型的视图。ByteBuffer依然是实际存储数据的地方。
+- **slice()**：创建新的ByteBuffer对象，和原来对象的字节数据相互关联，它们的区别是指针对象相互独立。
+
+## Charset
+
+把字符集包装成对象，提供字符集的编码器和解码器
+
+```java
+Charset.forName("UTF-8").encode("Hello World!")
+```
+
+## Java NIO分散/聚集或向量
+
+在Java NIO中，通道提供了称为分散/聚集或向量IO的重要功能。这是一种简单但功能强大的技术，通过这种技术，使用单个`write()`函数将字节从一组缓冲区写入流，并且可以使用单个`read()`函数将字节从流读取到一组缓冲区中。
+
+Java NIO已经内置了分散/聚集的支持。它可以用于从通道读取和写入通道。
+
+### 分散读取
+
+用于将数据从单个通道读取多个缓冲区中的数据![img](http://www.yiibai.com/uploads/images/201709/2809/705100927_11990.png)
+
+```java
+public interface ScatteringByteChannel extends ReadableByteChannel{
+    public long read(ByteBuffer[] args) throws IOException;
+    public long read(ByteBuffer[] args, int length, int offset) throws IOException;
+}
+```
+
+### 聚集写入
+
+用于将数据从多个缓冲区写入单个通道![img](http://www.yiibai.com/uploads/images/201709/2809/184100931_96335.png)
+
+```java
+public interface GatheringByteChannel extends WritableByteChannel{
+    public long write(ByteBuffer[] args) throws IOException;
+    public long write(ByteBuffer[] args, int length, int offset) throws IOException;
+}
+```
+
+### 基本散点/聚集示例
+
+第一个缓冲区保存随机数，第二个缓冲区使用分散/聚集机制保存写入的数据
+
+```java
+
+```
 
