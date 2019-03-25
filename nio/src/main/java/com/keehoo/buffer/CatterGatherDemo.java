@@ -1,4 +1,4 @@
-package com.keehoo.buffer.cattergatherio;
+package com.keehoo.buffer;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,13 +7,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
+import java.nio.charset.Charset;
 
 /**
  * @author wuzhihao
  * @version V1.0
  * @since 2019/3/24
  */
-public class Demo {
+public class CatterGatherDemo {
     public static void main(String[] args) {
         String data = "hello world";
         getherBytes(data);
@@ -53,9 +54,10 @@ public class Demo {
     private static void getherBytes(String data) {
         //the first buffer is used for holding a random number
         ByteBuffer buf1 = ByteBuffer.allocate(8);
+        Charset charset = Charset.forName("UTF-8");
         //the second buffer is used for holding a data that we want to write
         ByteBuffer buf2 = ByteBuffer.allocate(400);
-        buf1.asIntBuffer().put(250);
+        buf1.asIntBuffer().put(97);
         buf2.asCharBuffer().put(data);
         GatheringByteChannel gatherer = createChannelInstance("buffer-out.txt", true);
         //write the data into file

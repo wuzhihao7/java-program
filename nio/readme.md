@@ -536,7 +536,25 @@ ByteBuffer是唯一直接与通道交换的缓冲器。
 把字符集包装成对象，提供字符集的编码器和解码器
 
 ```java
-Charset.forName("UTF-8").encode("Hello World!")
+		Charset.forName("UTF-8").encode("Hello World!")
+    
+       	Charset cs1=Charset.forName("GBK");
+        //获取编码器
+        CharsetEncoder ce=cs1.newEncoder();
+        //获取解码器
+        CharsetDecoder cd=cs1.newDecoder();
+		//申请1024字节的空间地址
+        CharBuffer  cbuf=CharBuffer.allocate(1024);
+        cbuf.put("松鼠君");
+		//转化为读模式
+        cbuf.flip();
+        //编码
+        ByteBuffer bBuf=ce.encode(cbuf);
+        for (int i=0;i<6;i++){
+            System.out.println(bBuf.get());
+        }
+        bBuf.flip();//转化为读模式
+		System.out.println(cd.decode(bBuf));
 ```
 
 ## Java NIO分散/聚集或向量
@@ -572,6 +590,159 @@ public interface GatheringByteChannel extends WritableByteChannel{
 第一个缓冲区保存随机数，第二个缓冲区使用分散/聚集机制保存写入的数据
 
 ```java
+package com.keehoo.buffer.cattergatherio;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.GatheringByteChannel;
+import java.nio.channels.ScatteringByteChannel;
+import java.nio.charset.Charset;
+
+/**
+ * @author wuzhihao
+ * @version V1.0
+ * @since 2019/3/24
+ */
+public class Demo {
+    public static void main(String[] args) {
+        String data = "hello world";
+        getherBytes(data);
+        scatterBytes();
+    }
+
+    /**
+     * used for reading the bytes from a file channel into a set of buffers
+     */
+    private static void scatterBytes() {
+        //the first buf is used for holding a random number
+        ByteBuffer buf1 = ByteBuffer.allocate(8);
+        //the second buf is used for holding a data that we want to write
+        ByteBuffer buf2 = ByteBuffer.allocate(400);
+        ScatteringByteChannel scatter = createChannelInstance("buffer-out.txt", false);
+        //reading a data from the channel
+        try {
+            scatter.read(new ByteBuffer[]{buf1, buf2});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //read the two buffers seperately
+        buf1.rewind();
+        buf2.rewind();
+
+        int bufferOne = buf1.asIntBuffer().get();
+        String bufferTwo = buf2.asCharBuffer().toString();
+        //verification of content
+        System.out.println(bufferOne);
+        System.out.println(bufferTwo);
+    }
+
+    /**
+     * used for reading the bytes from the buffers and write it to a file channel
+     * @param data
+     */
+    private static void getherBytes(String data) {
+        //the first buffer is used for holding a random number
+        ByteBuffer buf1 = ByteBuffer.allocate(8);
+        Charset charset = Charset.forName("UTF-8");
+        //the second buffer is used for holding a data that we want to write
+        ByteBuffer buf2 = ByteBuffer.allocate(400);
+        buf1.asIntBuffer().put(97);
+        buf2.asCharBuffer().put(data);
+        GatheringByteChannel gatherer = createChannelInstance("buffer-out.txt", true);
+        //write the data into file
+        try {
+            gatherer.write(new ByteBuffer[]{buf1, buf2});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static FileChannel createChannelInstance(String file, boolean isOutput) {
+        FileChannel fileChannel = null;
+        try {
+            if(isOutput){
+                fileChannel = new FileOutputStream(file).getChannel();
+            }else{
+                fileChannel = new FileInputStream(file).getChannel();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fileChannel;
+    }
+}
+
+```
+
+## Java NIO通道之间的数据传输
+
+在Java NIO中，可以非常频繁地将数据从一个通道传输到另一个通道。批量传输文件数据是非常普遍的，因为几个优化方法已经添加到`FileChannel`类中，使其更有效率。
+
+通道之间的数据传输在`FileChannel`类中的两种方法是：
+
+- **FileChannel.transferTo()**：用来从FileChannel到其他通道的数据传输
+
+  ```java
+  public abstract class Channel extends AbstractChannel {
+      public abstract long transferTo(long position, long count, WritableByteChannel target);
+  }
+  ```
+
+- **FileChannel.transferFrom()**：从源通道到FileChannel的数据传输
+
+  ```java
+  public abstract class Channel extends AbstractChannel{
+      public abstract long transferFrom(ReadableByteChannel src, long position, long count);
+  }
+  ```
+
+### 基本通道到通道数据的传输示例
+
+从4个不同文件读取文件内容的简单示例，并将它们的组合输出写入到第五个文件：
+
+```java
+package com.keehoo.channel;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.util.stream.IntStream;
+
+/**
+ * @author wuzhihao
+ * @version V1.0
+ * @since 2019/3/24
+ */
+public class ChannelTransferDemo {
+    public static void main(String[] args) {
+        //path of input files
+        String filePath = "C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\";
+        String[] inputFiles = {filePath + "input1.txt", filePath + "input2.txt", filePath + "input3.txt", filePath + "input4.txt"};
+        //path of output file and contents will be written in this file
+        String outputFile = filePath + "outputall.txt";
+        //acquired the channel for output file
+        try (FileOutputStream fos = new FileOutputStream(outputFile);
+             //get the channel for input files
+             FileChannel targetChannel = fos.getChannel()) {
+            IntStream.range(0, inputFiles.length).forEach(i -> {
+                try (FileInputStream fis = new FileInputStream(inputFiles[i]);
+                     FileChannel inputChannel = fis.getChannel()) {
+                    //the data is transfer from input channel to output channel
+                    inputChannel.transferTo(0, inputChannel.size(), targetChannel);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    System.out.println("all jobs done.");
+    }
+}
 
 ```
 
