@@ -15,7 +15,7 @@ import java.nio.channels.FileChannel;
 public class FileCopyDemo {
     public static void main(String[] args) {
         try (
-                FileInputStream fis = new FileInputStream("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\nio-data.txt");
+                FileInputStream fis = new FileInputStream("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\channel-demo.txt");
                 FileOutputStream fos = new FileOutputStream("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\nio-data-output.txt")
         ){
             FileChannel fisChannel = fis.getChannel();
