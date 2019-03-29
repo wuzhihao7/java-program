@@ -1,5 +1,7 @@
 package com.keehoo.channel;
 
+import org.junit.Test;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -12,8 +14,9 @@ import java.nio.channels.FileChannel;
  * @since 2019/3/11
  */
 public class ChannelDemo {
-    public static void main(String[] args) {
-        try (RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\channel-demo.txt", "r")) {
+    @Test
+    public void testChannelToBuffer() {
+        try (RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\channel-read.txt", "r")) {
             //利用channel中的FileChannel来实现文件读取
             FileChannel channel = file.getChannel();
             //设置缓冲区容量
@@ -36,6 +39,23 @@ public class ChannelDemo {
                 //继续把通道内剩余数据写入缓冲区
                 read = channel.read(byteBuffer);
             }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testBufferToChannel(){
+        try(RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\channel-write.txt", "rw")){
+            FileChannel writeChannel = file.getChannel();
+
+            //分配缓冲区大小
+            ByteBuffer buffer = ByteBuffer.allocate(48);
+            buffer.put("hello world, nio write!".getBytes());
+
+            writeChannel.write(buffer);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

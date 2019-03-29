@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 public class BufferedReaderDemo {
     public static void main(String[] args) {
        try (
-            BufferedReader br = Files.newBufferedReader(Paths.get("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\channel-demo.txt"))
+            BufferedReader br = Files.newBufferedReader(Paths.get("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\channel-read.txt"))
         ){
             System.out.println(br.readLine());
        }catch (IOException e){

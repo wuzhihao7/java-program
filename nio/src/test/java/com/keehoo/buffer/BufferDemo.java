@@ -13,7 +13,7 @@ import java.nio.channels.FileChannel;
  */
 public class BufferDemo {
     public static void main(String[] args) {
-        try (RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\channel-demo.txt", "r")){
+        try (RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\channel-read.txt", "r")){
             FileChannel readChannel = file.getChannel();
             //分配buffer
             ByteBuffer buffer = ByteBuffer.allocate(48);
