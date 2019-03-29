@@ -52,10 +52,12 @@ public class ChannelDemo {
             FileChannel writeChannel = file.getChannel();
 
             //分配缓冲区大小
-            ByteBuffer buffer = ByteBuffer.allocate(48);
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
             buffer.put("hello world, nio write!".getBytes());
-
+            //重置position的值
+            buffer.flip();
             writeChannel.write(buffer);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
