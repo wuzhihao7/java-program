@@ -1,4 +1,0 @@
-this is the input1 data
-this is the input2 data
-this is the input3 data
-this is the input4 data

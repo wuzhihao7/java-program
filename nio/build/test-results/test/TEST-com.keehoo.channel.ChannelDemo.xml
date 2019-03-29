@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.keehoo.channel.ChannelDemo" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-03-29T08:35:59" hostname="WuZhihao" time="0.006">
-  <properties/>
-  <testcase name="testBufferToChannel" classname="com.keehoo.channel.ChannelDemo" time="0.006"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
