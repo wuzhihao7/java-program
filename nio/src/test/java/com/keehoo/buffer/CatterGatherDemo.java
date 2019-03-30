@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
-import java.nio.charset.Charset;
 
 /**
  * @author wuzhihao
@@ -29,7 +28,7 @@ public class CatterGatherDemo {
         ByteBuffer buf1 = ByteBuffer.allocate(8);
         //the second buf is used for holding a data that we want to write
         ByteBuffer buf2 = ByteBuffer.allocate(400);
-        ScatteringByteChannel scatter = createChannelInstance("buffer-out.txt", false);
+        ScatteringByteChannel scatter = createChannelInstance("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\gather-out.txt", false);
         //reading a data from the channel
         try {
             scatter.read(new ByteBuffer[]{buf1, buf2});
@@ -49,17 +48,17 @@ public class CatterGatherDemo {
 
     /**
      * used for reading the bytes from the buffers and write it to a file channel
+     *
      * @param data
      */
     private static void getherBytes(String data) {
         //the first buffer is used for holding a random number
         ByteBuffer buf1 = ByteBuffer.allocate(8);
-        Charset charset = Charset.forName("UTF-8");
         //the second buffer is used for holding a data that we want to write
         ByteBuffer buf2 = ByteBuffer.allocate(400);
         buf1.asIntBuffer().put(97);
         buf2.asCharBuffer().put(data);
-        GatheringByteChannel gatherer = createChannelInstance("buffer-out.txt", true);
+        GatheringByteChannel gatherer = createChannelInstance("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\gather-out.txt", true);
         //write the data into file
         try {
             gatherer.write(new ByteBuffer[]{buf1, buf2});
@@ -71,9 +70,9 @@ public class CatterGatherDemo {
     private static FileChannel createChannelInstance(String file, boolean isOutput) {
         FileChannel fileChannel = null;
         try {
-            if(isOutput){
+            if (isOutput) {
                 fileChannel = new FileOutputStream(file).getChannel();
-            }else{
+            } else {
                 fileChannel = new FileInputStream(file).getChannel();
             }
         } catch (IOException e) {

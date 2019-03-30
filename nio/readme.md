@@ -500,10 +500,9 @@ CharBuffer buf = CharBuffer.allocate(2048);
 - **reset()**：将当前position设为mark标记的值
 - **hasRemaining()**：position和limit之间是否还有元素。
 - **clear()**：清空整个缓冲区（没有擦除）。未读数据复制到缓冲区的起始处，position设到最后一个未读数据后。
+- **compact()**：将所有未读数据拷贝到缓冲区起始处，然后将position设置到最后一个未读元素的正后面。limit依然像clear()方法一样，设置成capacity。
 
-### 比较
-
-> **equals()**
+- **equals()**
 
 当满足下列条件时，表示两个Buffer相等：
 
@@ -511,7 +510,7 @@ CharBuffer buf = CharBuffer.allocate(2048);
 2. Buffer中剩余的byte、char等的个数相等
 3. Buffer中所有剩余的byte、char等都相等
 
-> **compareTo()**
+- **compareTo()**
 
 比较两个同类型Buffer的剩余元数，如果满足下列条件，则认为一个Buffer小于另一个Buffer：
 

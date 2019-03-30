@@ -1,10 +1,13 @@
 package com.keehoo.channel;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.stream.IntStream;
 
 /**
  * @author wuzhihao
@@ -12,28 +15,41 @@ import java.util.stream.IntStream;
  * @since 2019/3/24
  */
 public class ChannelTransferDemo {
-    public static void main(String[] args) {
-        //path of input files
-        String filePath = "C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\";
-        String[] inputFiles = {filePath + "input1.txt", filePath + "input2.txt", filePath + "input3.txt", filePath + "input4.txt"};
-        //path of output file and contents will be written in this file
-        String outputFile = filePath + "outputall.txt";
-        //acquired the channel for output file
-        try (FileOutputStream fos = new FileOutputStream(outputFile);
-             //get the channel for input files
-             FileChannel targetChannel = fos.getChannel()) {
-            IntStream.range(0, inputFiles.length).forEach(i -> {
-                try (FileInputStream fis = new FileInputStream(inputFiles[i]);
-                     FileChannel inputChannel = fis.getChannel()) {
-                    //the data is transfer from input channel to output channel
-                    inputChannel.transferTo(0, inputChannel.size(), targetChannel);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    System.out.println("all jobs done.");
+    private String filePath = "C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\";
+    private RandomAccessFile fromFile;
+    private RandomAccessFile toFile;
+    private FileChannel fromChannel;
+    private FileChannel toChannel;
+
+    @Before
+    public void setUp() throws FileNotFoundException {
+        RandomAccessFile fromFile = new RandomAccessFile(filePath + "fromFile.txt", "rw");
+        RandomAccessFile toFile = new RandomAccessFile(filePath + "toFile.txt", "rw");
+        FileChannel fromChannel = fromFile.getChannel();
+        FileChannel toChannel = toFile.getChannel();
+        this.toFile = toFile;
+        this.fromFile = fromFile;
+        this.toChannel = toChannel;
+        this.fromChannel = fromChannel;
+    }
+
+    /**
+     * 将数据从源通道传输到fileChannel中
+     */
+    @Test
+    public void testTransferFrom() throws IOException {
+        long position = 0;
+        long count = fromChannel.size();
+        toChannel.transferFrom(fromChannel, position, count);
+        final ByteBuffer buffer = ByteBuffer.allocate(1024);
+        toChannel.read(buffer);
+        System.out.print(new String(buffer.array()));
+    }
+
+    @Test
+    public void testTransferTo() throws IOException {
+        long position = 0;
+        long count = fromChannel.size();
+        fromChannel.transferTo(position, count, toChannel);
     }
 }
