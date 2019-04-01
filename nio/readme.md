@@ -334,64 +334,81 @@ FileChannel常用方法：
 > 文件拷贝
 
 ```java
-package com.house.channel;
+package com.keehoo.channel;
 
-import java.io.FileInputStream;
+import org.junit.Test;
+
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 
 /**
  * @author wuzhihao
  * @version V1.0
- * @since 2019/3/23
+ * @since 2019/3/11
  */
-public class FileCopyDemo {
-    public static void main(String[] args) {
-        try (
-                FileInputStream fis = new FileInputStream("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\nio-data.txt");
-                FileOutputStream fos = new FileOutputStream("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\nio-data-output.txt")
-        ){
-            FileChannel fisChannel = fis.getChannel();
-            FileChannel fosChannel = fos.getChannel();
-            copy(fisChannel, fosChannel);
-            System.out.println("done.");
-        }catch (FileNotFoundException e){
-            e.printStackTrace();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
+public class ChannelDemo {
+    @Test
+    public void testChannelToBuffer() {
+        try (RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\channel-read.txt", "r");
+             //利用channel中的FileChannel来实现文件读取
+             FileChannel channel = file.getChannel();) {
 
-    }
-
-    private static void copy(FileChannel fisChannel, FileChannel fosChannel) {
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
-        int read = -1;
-        try {
-            read = fisChannel.read(buffer);
+            Charset charset = Charset.forName("UTF-8");
+            CharsetDecoder decoder = charset.newDecoder();
+            //设置缓冲区容量
+            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+            CharBuffer charBuffer = CharBuffer.allocate(1024);
+            //从通道中读取数据到缓冲区，返回读取的字节数量
+            int read = channel.read(byteBuffer);
+            //数量为-1表示读取完毕
+            while (read != -1) {
+                System.out.print("read:" + read + ":");
+                //切换模式为读模式，其实就是把position的位置设置为0，可以从0开始读取
+                byteBuffer.flip();
+                decoder.decode(byteBuffer, charBuffer, false);
+                charBuffer.flip();
+                //如果缓冲区还有数据
+                while (charBuffer.hasRemaining()) {
+                    //输出缓冲区内容
+//                    System.out.print(((char) byteBuffer.get()));
+                    System.out.print(charBuffer.get());
+                }
+                System.out.println();
+                //数据读取完毕后清空缓冲区,（直接把position复位为0，可以直接覆盖内容）
+                byteBuffer.clear();
+                charBuffer.clear();
+                //继续把通道内剩余数据写入缓冲区
+                read = channel.read(byteBuffer);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        while (read != -1){
-            //the buffer is used to drained
+    }
+
+    @Test
+    public void testBufferToChannel(){
+        try(RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\channel-write.txt", "rw")){
+            FileChannel writeChannel = file.getChannel();
+
+            //分配缓冲区大小
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            buffer.put("hello world, nio write!".getBytes());
+            //重置position的值
             buffer.flip();
-            //keep sure that buffer was fully drained
-            while (buffer.hasRemaining()){
-                try {
-                    fosChannel.write(buffer);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            // Now the buffer is empty, ready for the filling
-            buffer.clear();
-            try {
-                read = fisChannel.read(buffer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            writeChannel.write(buffer);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
@@ -529,6 +546,50 @@ ByteBuffer是唯一直接与通道交换的缓冲器。
 
 - **asXXBuffer系列方法**：可以获得特定基本数据类型的视图。ByteBuffer依然是实际存储数据的地方。
 - **slice()**：创建新的ByteBuffer对象，和原来对象的字节数据相互关联，它们的区别是指针对象相互独立。
+
+### 示例
+
+```java
+package com.keehoo.buffer;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+
+/**
+ * @author wuzhihao
+ * @version V1.0
+ * @since 2019/3/29
+ */
+public class BufferDemo {
+    public static void main(String[] args) {
+        try (RandomAccessFile file = new RandomAccessFile("C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\channel-read.txt", "r")){
+            FileChannel readChannel = file.getChannel();
+            //分配buffer
+            ByteBuffer buffer = ByteBuffer.allocate(48);
+            int read = readChannel.read(buffer);
+            //buffer已经读满
+            while (read != -1){
+                buffer.flip();
+                //buffer有内容
+                while (buffer.hasRemaining()){
+                    System.out.print((char)buffer.get());
+                }
+                //清空buffer
+                buffer.clear();
+                read = readChannel.read(buffer);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+```
 
 ## Charset
 
@@ -705,11 +766,14 @@ public class Demo {
 ```java
 package com.keehoo.channel;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.stream.IntStream;
 
 /**
  * @author wuzhihao
@@ -717,31 +781,61 @@ import java.util.stream.IntStream;
  * @since 2019/3/24
  */
 public class ChannelTransferDemo {
-    public static void main(String[] args) {
-        //path of input files
-        String filePath = "C:\\job\\workspace\\idea\\java-samples\\nio\\src\\main\\resources\\";
-        String[] inputFiles = {filePath + "input1.txt", filePath + "input2.txt", filePath + "input3.txt", filePath + "input4.txt"};
-        //path of output file and contents will be written in this file
-        String outputFile = filePath + "outputall.txt";
-        //acquired the channel for output file
-        try (FileOutputStream fos = new FileOutputStream(outputFile);
-             //get the channel for input files
-             FileChannel targetChannel = fos.getChannel()) {
-            IntStream.range(0, inputFiles.length).forEach(i -> {
-                try (FileInputStream fis = new FileInputStream(inputFiles[i]);
-                     FileChannel inputChannel = fis.getChannel()) {
-                    //the data is transfer from input channel to output channel
-                    inputChannel.transferTo(0, inputChannel.size(), targetChannel);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    System.out.println("all jobs done.");
+    private String filePath = "C:\\job\\workspace\\idea\\java-samples\\nio\\src\\test\\resources\\";
+    private RandomAccessFile fromFile;
+    private RandomAccessFile toFile;
+    private FileChannel fromChannel;
+    private FileChannel toChannel;
+
+    @Before
+    public void setUp() throws FileNotFoundException {
+        RandomAccessFile fromFile = new RandomAccessFile(filePath + "fromFile.txt", "rw");
+        RandomAccessFile toFile = new RandomAccessFile(filePath + "toFile.txt", "rw");
+        FileChannel fromChannel = fromFile.getChannel();
+        FileChannel toChannel = toFile.getChannel();
+        this.toFile = toFile;
+        this.fromFile = fromFile;
+        this.toChannel = toChannel;
+        this.fromChannel = fromChannel;
+    }
+
+    /**
+     * 将数据从源通道传输到fileChannel中
+     */
+    @Test
+    public void testTransferFrom() throws IOException {
+        long position = 0;
+        long count = fromChannel.size();
+        toChannel.transferFrom(fromChannel, position, count);
+        final ByteBuffer buffer = ByteBuffer.allocate(1024);
+        toChannel.read(buffer);
+        System.out.print(new String(buffer.array()));
+    }
+
+    @Test
+    public void testTransferTo() throws IOException {
+        long position = 0;
+        long count = fromChannel.size();
+        fromChannel.transferTo(position, count, toChannel);
     }
 }
 
 ```
+
+## Selector
+
+选择器是Java NIO中能够检测多个NIO通道，并能够知道通道是否为诸如读写事件做好准备的组件。这样，一个单独的线程可以管理多个channel，从而管理多个网络连接，提高效率。
+
+使用了选择器就可以用一个线程管理多个channel，如果多个channel有多个线程管理，线程之前的切换是消耗资源的，而单个线程就避免了线程之间的消耗。
+
+### 选择器常用方法
+
+- **register(Selector selector, int ops)**：向选择器注册通道，并且可以选择注册指定的事件，目前事件分为4种：1.Connect，2.Accept，3.Read， 4.Write，一个通道可以注册多个事件
+- **select()**：阻塞到至少有一个通道在你注册的事件上就绪了
+- **selectNow()**：不会阻塞，不管什么通道就绪都立刻返回
+- **select(long timeout)**：和select()一样，除了最长会阻塞timeout毫秒
+- **selectedKeys()**：一旦调用了select()方法，并且返回值表明有一个或更多个通道就绪了，然后可以通过调用selector的selectedKeys()方法，访问"以选择键集(selected key set)"中的就绪通道
+- **wakeUp()**：可以使调用select()阻塞的对象返回，不阻塞。
+- **close()**：用完selector后调用其close()方法会关闭该Selector，且使注册到该Selector上的所有selectionKey实例无效。通道本身不会关闭
+- **open()**：创建一个Selector
 
