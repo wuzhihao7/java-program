@@ -43,22 +43,24 @@ public class SelectorDemo {
                         //在自己注册的事件中写业务逻辑
                         ServerSocketChannel serverSocketChannel1 = (ServerSocketChannel) key.channel();
                         SocketChannel socketChannel = serverSocketChannel1.accept();
-                        ByteBuffer buf1 = ByteBuffer.allocate(1024);
-                        socketChannel.read(buf1);
-                        buf1.flip();
-                        if(buf1.hasRemaining()){
-                            System.out.println(">>>服务端收到数据：" + new String(buf1.array()));
-                        }
-                        buf1.clear();
+                        if(socketChannel != null){
+                            ByteBuffer buf1 = ByteBuffer.allocate(1024);
+                            socketChannel.read(buf1);
+                            buf1.flip();
+                            if(buf1.hasRemaining()){
+                                System.out.println(">>>服务端收到数据：" + new String(buf1.array()));
+                            }
+                            buf1.clear();
 
-                        ByteBuffer header = ByteBuffer.allocate(6);
-                        header.put("[head]".getBytes());
-                        ByteBuffer body = ByteBuffer.allocate(1024);
-                        body.put("this is body".getBytes());
-                        header.flip();
-                        body.flip();
-                        ByteBuffer[] bufArray = {header, body};
-                        socketChannel.write(bufArray);
+                            ByteBuffer header = ByteBuffer.allocate(6);
+                            header.put("[head]".getBytes());
+                            ByteBuffer body = ByteBuffer.allocate(1024);
+                            body.put("this is body".getBytes());
+                            header.flip();
+                            body.flip();
+                            ByteBuffer[] bufArray = {header, body};
+                            socketChannel.write(bufArray);
+                        }
                     }else if (key.isConnectable()) {
                     } else if (key.isReadable()) {
                     } else if (key.isWritable()) {
