@@ -28,7 +28,7 @@ public class SelectorDemo {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
             System.out.println("服务端启动成功...");
             while (true){
-                //获取已经准备好的通道数量
+                //获取已经准备好的通道数量，此方法执行非阻塞的选择操作。如果自从前一次选择操作后，没有通道变成可选择的，则此方法返回0
                 int readyChannels = selector.selectNow();
                 //如果没有准备好，重试
                 if(readyChannels == 0){
