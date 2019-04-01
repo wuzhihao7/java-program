@@ -22,6 +22,7 @@ public class SelectorDemo {
             Selector selector = Selector.open();
 
             serverSocketChannel.socket().bind(new InetSocketAddress(8090));
+            //与Selector一起使用时，Channel必须处于非阻塞模式下。这意味着不能将FileChannel与Selector一起使用，因为FileChannel不能切换到非阻塞模式。而套接字可以。
             serverSocketChannel.configureBlocking(false);
             //向通道注册选择器，并注册接受事件
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
