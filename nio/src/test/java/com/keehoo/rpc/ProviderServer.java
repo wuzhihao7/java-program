@@ -43,11 +43,13 @@ public class ProviderServer implements Runnable {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
             while (true) {
                 int readyChannels = selector.selectNow();
-                if (readyChannels == 0) continue;
-                Set selectedKeys = selector.selectedKeys();
-                Iterator keyIterator = selectedKeys.iterator();
+                if (readyChannels == 0){
+                    continue;
+                }
+                Set<SelectionKey> selectionKeys = selector.selectedKeys();
+                Iterator<SelectionKey> keyIterator = selectionKeys.iterator();
                 while (keyIterator.hasNext()) {
-                    SelectionKey key = (SelectionKey) keyIterator.next();
+                    SelectionKey key = keyIterator.next();
                     if (key.isAcceptable()) {
                         ServerSocketChannel serverSocketChannel1 = (ServerSocketChannel) key.channel();
                         SocketChannel socketChannel = serverSocketChannel1.accept();
