@@ -1,6 +1,7 @@
 package com.keehoo.rule.controller;
 
 import com.keehoo.rule.dto.UserInputDTO;
+import com.keehoo.rule.dto.UserOutputDTO;
 import com.keehoo.rule.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,9 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class UserController {
     @PostMapping
-    public User addUser(@RequestBody UserInputDTO userInputDTO){
+    public UserOutputDTO addUser(@RequestBody UserInputDTO userInputDTO){
         log.info("{}", userInputDTO);
         User user = userInputDTO.convertToUser();
-        return user;
+        UserOutputDTO userOutputDTO = new UserOutputDTO().convertFor(user);
+        return userOutputDTO;
     }
 }
