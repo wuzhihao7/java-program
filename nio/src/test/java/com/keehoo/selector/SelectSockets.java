@@ -20,6 +20,7 @@ public class SelectSockets {
     /**
      * use the same byte buffer for all channels.
      * A single thread is servicing all the channels, so no danger of concurrent access.
+     * 直接内存不能用Buffer.array()方法
      */
     private ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 
@@ -125,12 +126,13 @@ public class SelectSockets {
             //发送数据，不要期望能一次将数据发送完
             while (buffer.hasRemaining()){
                 //此代码可能会在繁忙的循环中旋转
-                socketChannel.read(buffer);
+                socketChannel.write(buffer);
             }
             buffer.clear();
         }
         if(count == -1){
             //读取结束后关闭通道，使key失效
+            System.out.println("关闭通道");
             socketChannel.close();
         }
     }
