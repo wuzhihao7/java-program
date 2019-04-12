@@ -15,7 +15,7 @@ import java.util.Iterator;
  * @since 2019/4/12
  */
 public class SelectSockets {
-    public static int PORT = 1234;
+    public static int PORT = 8090;
 
     /**
      * use the same byte buffer for all channels.
@@ -130,10 +130,8 @@ public class SelectSockets {
             }
             buffer.clear();
         }
-        if(count == -1){
-            //读取结束后关闭通道，使key失效
-            System.out.println("关闭通道");
-            socketChannel.close();
-        }
+        //读取结束后关闭通道，使key失效
+        System.out.println("关闭通道");
+        socketChannel.close();
     }
 }
