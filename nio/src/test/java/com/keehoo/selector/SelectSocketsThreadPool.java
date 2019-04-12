@@ -21,6 +21,19 @@ public class SelectSocketsThreadPool extends SelectSockets {
         new SelectSocketsThreadPool().go(args);
     }
 
+    @Override
+    protected void readDataFromSocket(SelectionKey selectionKey) throws IOException {
+        WorkerThread worker = threadPool.getWorker();
+        if(worker == null){
+            //No threads available. Do nothing. The selection
+            // loop will keep calling this method until a
+            // thread becomes available. This design could
+            // be improved.
+            return;
+        }
+        //Invoking this wakes up the worker thread, then returns
+        worker.serviceChannel(selectionKey);
+    }
 
     /**
      * 一个简单的线程池类
@@ -81,6 +94,7 @@ public class SelectSocketsThreadPool extends SelectSockets {
             this.pool = pool;
         }
 
+        @Override
         public synchronized void run() {
             System.out.println(this.getName() + " is ready.");
             while (true) {

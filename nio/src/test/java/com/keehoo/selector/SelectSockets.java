@@ -114,7 +114,7 @@ public class SelectSockets {
      * 并且会自动使相关的key失效，选择器然后会在下一次的select call时取消掉通道的注册
      * @param selectionKey
      */
-    private void readDataFromSocket(SelectionKey selectionKey) throws IOException {
+    protected void readDataFromSocket(SelectionKey selectionKey) throws IOException {
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
         int count;
         //清空buffer
