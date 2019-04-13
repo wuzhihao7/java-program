@@ -10,8 +10,9 @@ import java.util.concurrent.*;
 public class CreateThreadDemo {
     public static void main(String[] args) {
         thread();
-//        runnable();
-//        callable();
+        runnable();
+        callable();
+        futureTask();
     }
 
     /**
@@ -45,15 +46,30 @@ public class CreateThreadDemo {
      * 实现Callable接口
      */
     public static void callable(){
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<String> future = executor.submit(new Callable<String>() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<String> future = executorService.submit(new Callable<String>() {
             @Override
-            public String call() throws Exception {
+            public String call() {
                 return "实现Callable接口";
             }
         });
+        executorService.shutdown();
         try {
             String s = future.get();
+            System.out.println(s);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void futureTask(){
+        FutureTask<String> futureTask = new FutureTask<>(() -> "FutureTask");
+        Thread thread = new Thread(futureTask);
+        thread.start();
+        try {
+            String s = futureTask.get();
             System.out.println(s);
         } catch (InterruptedException e) {
             e.printStackTrace();
