@@ -9,12 +9,17 @@ import java.util.stream.IntStream;
  */
 public class InterruptDemo {
     public static void main(String[] args) {
-//        interrupt1();
-//        interrupt2();
-//        intettupt3();
+        interrupt1();
+        interrupt2();
+        intettupt3();
         interrupt4();
     }
 
+    /**
+     * 开启了两个线程分别为sleepThread和BusyThread, sleepThread睡眠1s，BusyThread执行死循环。
+     * 然后分别对着两个线程进行中断操作，可以看出sleepThread抛出InterruptedException后清除标志位，
+     * 而busyThread就不会清除标志位
+     */
     public static void interrupt1() {
         final Thread sleepThread = new Thread() {
             @Override
