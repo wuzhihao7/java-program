@@ -1,4 +1,4 @@
-package com.keehoo.thread;
+package com.keehoo.thread.lock;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

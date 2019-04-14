@@ -1067,6 +1067,10 @@ public interface Lock {
 }
 ```
 
+##### ReentrantLock
+
+ReentrantLock，意思是“可重入锁”。ReentrantLock是唯一实现了Lock接口的类。
+
 > lock()
 
 用来获取锁。如果锁已被其他线程获取，则进行等待
@@ -1253,7 +1257,237 @@ class MyThreadDemo extends Thread{
 
 而用synchronized修饰的话，当一个线程处于等待某个锁的状态，是无法被中断的，只有一直等待下去。
 
-#### ReentrantLock
+#### ReadWriteLock
 
-ReentrantLock，意思是“可重入锁”。ReentrantLock是唯一实现了Lock接口的类。
+ReadWriteLock也是一个接口，在它里面只定义了两个方法：
 
+```java
+public interface ReadWriteLock {
+    /**
+     * Returns the lock used for reading.
+     */
+    Lock readLock();
+ 
+    /**
+     * Returns the lock used for writing.
+     */
+    Lock writeLock();
+}
+```
+
+一个用来获取读锁，一个用来获取写锁。也就是说将文件的读写操作分开，分成2个锁来分配给线程，从而使得多个线程可以同时进行读操作。下面的ReentrantReadWriteLock实现了ReadWriteLock接口。
+
+##### **ReentrantReadWriteLock**
+
+ReentrantReadWriteLock里面提供了很多丰富的方法，不过最主要的有两个方法：readLock()和writeLock()用来获取读锁和写锁。
+
+**如果有一个线程已经占用了读锁，则此时其他线程如果要申请写锁，则申请写锁的线程会一直等待释放读锁。**
+
+**如果有一个线程已经占用了写锁，则此时其他线程如果申请写锁或者读锁，则申请的线程会一直等待释放写锁。**
+
+```java
+package com.keehoo.thread.readwritelock;
+
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.IntStream;
+
+/**
+ * @author wuzhihao
+ * @version V1.0
+ * @since 2019/4/14
+ */
+public class ReentrantReadWriteLockDemo {
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+    public synchronized void get(){
+        IntStream.range(0, 20).forEach(i -> System.out.println(Thread.currentThread().getName()+" 正在进行读操作"));
+        System.out.println(Thread.currentThread().getName()+" 读操作进行完毕");
+    }
+
+    public void get2(){
+        lock.readLock().lock();
+        try {
+            IntStream.range(0, 50).forEach(i -> System.out.println(Thread.currentThread().getName()+" 正在进行读操作"));
+            System.out.println(Thread.currentThread().getName()+" 读操作进行完毕");
+        }finally {
+            lock.readLock().unlock();
+        }
+    }
+    public static void main(String[] args) {
+//        synchronizedDemo();
+        readWriteLock();
+
+    }
+
+    private static void synchronizedDemo() {
+        ReentrantReadWriteLockDemo demo = new ReentrantReadWriteLockDemo();
+        new Thread(){
+            @Override
+            public void run() {
+                demo.get();
+            }
+        }.start();
+
+        new Thread(){
+            @Override
+            public void run() {
+                demo.get();
+            }
+        }.start();
+    }
+
+    private static void readWriteLock(){
+        ReentrantReadWriteLockDemo demo = new ReentrantReadWriteLockDemo();
+        new Thread(){
+            @Override
+            public void run() {
+                demo.get2();
+            }
+        }.start();
+
+        new Thread(){
+            @Override
+            public void run() {
+                demo.get2();
+            }
+        }.start();
+    }
+}
+
+```
+
+#### Lock和synchronized的选择
+
+总结来说，Lock和synchronized有以下几点不同：
+
+　　1）Lock是一个接口，而synchronized是Java中的关键字，synchronized是内置的语言实现；
+
+　　2）synchronized在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能造成死锁现象，因此使用Lock时需要在finally块中释放锁；
+
+　　3）Lock可以让等待锁的线程响应中断，而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够响应中断；
+
+　　4）通过Lock可以知道有没有成功获取锁，而synchronized却无法办到。
+
+　　5）Lock可以提高多个线程进行读操作的效率。
+
+　　在性能上来说，如果竞争资源不激烈，两者的性能是差不多的，而当竞争资源非常激烈时（即有大量线程同时竞争），此时Lock的性能要远远优于synchronized。所以说，在具体使用时要根据适当情况选择。
+
+### 锁的相关概念介绍
+
+#### 可重入锁
+
+如果锁具备可重入性，则称作为可重入锁。像synchronized和ReentrantLock都是可重入锁，可重入性在我看来实际上表明了锁的分配机制：基于线程的分配，而不是基于方法调用的分配。举个简单的例子，当一个线程执行到某个synchronized方法时，比如说method1，而在method1中会调用另外一个synchronized方法method2，此时线程不必重新去申请锁，而是可以直接执行方法method2。
+
+```java
+class MyClass {
+    public synchronized void method1() {
+        method2();
+    }
+     
+    public synchronized void method2() {
+    }
+}
+```
+
+上述代码中的两个方法method1和method2都用synchronized修饰了，假如某一时刻，线程A执行到了method1，此时线程A获取了这个对象的锁，而由于method2也是synchronized方法，假如synchronized不具备可重入性，此时线程A需要重新申请锁。但是这就会造成一个问题，因为线程A已经持有了该对象的锁，而又在申请获取该对象的锁，这样就会线程A一直等待永远不会获取到的锁。而由于synchronized和Lock都具备可重入性，所以不会发生上述现象。
+
+#### 可中断锁
+
+可中断锁：顾名思义，就是可以相应中断的锁。
+
+在Java中，synchronized就不是可中断锁，而Lock是可中断锁。
+
+如果某一线程A正在执行锁中的代码，另一线程B正在等待获取该锁，可能由于等待时间过长，线程B不想等待了，想先处理其他事情，我们可以让它中断自己或者在别的线程中中断它，这种就是可中断锁。
+
+#### 公平锁
+
+公平锁即尽量以请求锁的顺序来获取锁。比如同是有多个线程在等待一个锁，当这个锁被释放时，等待时间最久的线程（最先请求的线程）会获得该所，这种就是公平锁。
+
+非公平锁即无法保证锁的获取是按照请求锁的顺序进行的。这样就可能导致某个或者一些线程永远获取不到锁。
+
+在Java中，synchronized就是非公平锁，它无法保证等待的线程获取锁的顺序。
+
+而对于ReentrantLock和ReentrantReadWriteLock，它默认情况下是非公平锁，但是可以设置为公平锁。
+
+我们可以在创建ReentrantLock对象时，通过以下方式来设置锁的公平性：
+
+如果参数为true表示为公平锁，为fasle为非公平锁。默认情况下，如果使用无参构造器，则是非公平锁。
+
+另外在ReentrantLock类中定义了很多方法，比如：
+
+- isFair()        //判断锁是否是公平锁
+
+- isLocked()    //判断锁是否被任何线程获取了
+
+- isHeldByCurrentThread()  //判断锁是否被当前线程获取了
+
+- hasQueuedThreads()   //判断是否有线程在等待该锁，在ReentrantReadWriteLock中也有类似的方法，同样也可以设置为公平锁和非公平锁。不过要记住，ReentrantReadWriteLock并未实现Lock接口，它实现的是ReadWriteLock接口。
+
+#### 读写锁
+
+读写锁将对一个资源（比如文件）的访问分成了2个锁，一个读锁和一个写锁。
+
+正因为有了读写锁，才使得多个线程之间的读操作不会发生冲突。
+
+ReadWriteLock就是读写锁，它是一个接口，ReentrantReadWriteLock实现了这个接口。
+
+可以通过readLock()获取读锁，通过writeLock()获取写锁。
+
+## AQS
+
+同步器是用来构建锁和其他同步组件的基础框架，它的实现主要依赖一个int成员变量来表示同步状态以及通过一个FIFO队列构成等待队列。它的**子类必须重写AQS的几个protected修饰的用来改变同步状态的方法**，其他方法主要是实现了排队和阻塞机制。**状态的更新使用getState,setState以及compareAndSetState这三个方法**。
+
+子类被**推荐定义为自定义同步组件的静态内部类**，同步器自身没有实现任何同步接口，它仅仅是定义了若干同步状态的获取和释放方法来供自定义同步组件的使用，同步器既支持独占式获取同步状态，也可以支持共享式获取同步状态，这样就可以方便的实现不同类型的同步组件。
+
+同步器是实现锁（也可以是任意同步组件）的关键，在锁的实现中聚合同步器，利用同步器实现锁的语义。可以这样理解二者的关系：**锁是面向使用者，它定义了使用者与锁交互的接口，隐藏了实现细节；同步器是面向锁的实现者，它简化了锁的实现方式，屏蔽了同步状态的管理，线程的排队，等待和唤醒等底层操作**。锁和同步器很好的隔离了使用者和实现者所需关注的领域。
+
+### AQS的模板方法设计模式
+
+AQS的设计是使用模板方法设计模式，它将**一些方法开放给子类进行重写，而同步器给同步组件所提供模板方法又会重新调用被子类所重写的方法**。举个例子，AQS中需要重写的方法tryAcquire：
+
+```java
+protected boolean tryAcquire(int arg) {
+	throw new UnsupportedOperationException();
+}
+```
+
+ReentrantLock中NonfairSync（继承AQS）会重写该方法为：
+
+```java
+protected final boolean tryAcquire(int acquires) {
+	return nonfairTryAcquire(acquires);
+}
+```
+
+而AQS中的模板方法acquire():
+
+```java
+public final void acquire(int arg) {
+    if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg)){
+        selfInterrupt();
+    }
+}
+```
+
+会调用tryAcquire方法，而此时当继承AQS的NonfairSync调用模板方法acquire时就会调用已经被NonfairSync重写的tryAcquire方法。这就是使用AQS的方式，在弄懂这点后会lock的实现理解有很大的提升。可以归纳总结为这么几点：
+
+1. 同步组件（这里不仅仅值锁，还包括CountDownLatch等）的实现依赖于同步器AQS，在同步组件实现中，使用AQS的方式被推荐定义继承AQS的静态内存类；
+2. AQS采用模板方法进行设计，AQS的protected修饰的方法需要由继承AQS的子类进行重写实现，当调用AQS的子类的方法时就会调用被重写的方法；
+3. AQS负责同步状态的管理，线程的排队，等待和唤醒这些底层操作，而Lock等同步组件主要专注于实现同步语义；
+4. 在重写AQS的方式时，使用AQS提供的`getState(),setState(),compareAndSetState()`方法进行修改同步状态
+
+AQS可重写的方法如下图
+
+![AQSÃ¥ÂÂ¯Ã©ÂÂÃ¥ÂÂÃ§ÂÂÃ¦ÂÂ¹Ã¦Â³Â.png](https://www.javazhiyin.com/wp-content/uploads/2018/07/a86795cdfb34f2b28176f9eedbd28da8.png)
+
+在实现同步组件时AQS提供的模板方法如下图：
+
+![AQSÃ¦ÂÂÃ¤Â¾ÂÃ§ÂÂÃ¦Â¨Â¡Ã¦ÂÂ¿Ã¦ÂÂ¹Ã¦Â³Â.png](https://www.javazhiyin.com/wp-content/uploads/2018/07/9ab0cd2ba2e92e8b08c69a90e3e08461.png)
+
+AQS提供的模板方法可以分为3类：
+
+1. 独占式获取与释放同步状态；
+2. 共享式获取与释放同步状态；
+3. 查询同步队列中等待线程情况；
+
+同步组件通过AQS提供的模板方法实现自己的同步语义。

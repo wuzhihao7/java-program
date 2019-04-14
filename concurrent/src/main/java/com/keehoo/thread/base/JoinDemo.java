@@ -1,4 +1,4 @@
-package com.keehoo.thread;
+package com.keehoo.thread.base;
 
 /**
  * @author wuzhihao
