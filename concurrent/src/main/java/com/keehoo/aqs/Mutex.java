@@ -1,6 +1,5 @@
 package com.keehoo.aqs;
 
-import com.sun.corba.se.impl.orbutil.concurrent.Sync;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
