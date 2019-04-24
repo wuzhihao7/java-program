@@ -1494,3 +1494,24 @@ AQS提供的模板方法可以分为3类：
 新建同步组件需要把握两点：
 1. 实现同步组件时推荐定义继承AQS的静态内存类，并重写需要的protected修饰的方法；
 2. 同步组件语义的实现依赖于AQS的模板方法，而AQS模板方法又依赖于被AQS的子类所重写的方法。
+
+### 同步队列
+
+当共享进程被某个线程占有，其他请求资源的线程将会阻塞，从而进入同步队列。AQS中的同步队列是通过链式方式进行实现。
+
+在AQS有一个静态内部类Node，其中有这样一些属性：
+
+```java
+volatile int waitStatus;//节点状态
+volatile Node prev;//当前节点/线程的前驱节点
+volatile Node next;//当前节点/线程的后继节点
+volatile Thread thread;//加入同步队列的线程引用
+Node nextWaiter;//等待队列中的下一个节点
+```
+
+节点状态有：
+
+- int CANCELLED = 1;//节点从同步队列中取消
+- int SIGNAL = -1;//后继节点的线程处于等待状态，如果当前节点释放同步状态会通知后继节点，使得后记节点的线程能够运行；
+- int CONDITION = -2;//当前节点进入等待队列中
+- int PROPAGATE = -3;//
