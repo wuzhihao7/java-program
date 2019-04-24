@@ -1514,4 +1514,5 @@ Node nextWaiter;//等待队列中的下一个节点
 - int CANCELLED = 1;//节点从同步队列中取消
 - int SIGNAL = -1;//后继节点的线程处于等待状态，如果当前节点释放同步状态会通知后继节点，使得后记节点的线程能够运行；
 - int CONDITION = -2;//当前节点进入等待队列中
-- int PROPAGATE = -3;//
+- int PROPAGATE = -3;//表示下一次共享式同步状态获取将会无条件传播下去
+- int INITIAL
