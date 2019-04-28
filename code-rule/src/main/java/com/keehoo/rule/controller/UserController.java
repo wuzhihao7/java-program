@@ -1,5 +1,6 @@
 package com.keehoo.rule.controller;
 
+import com.keehoo.rule.dto.ApiResult;
 import com.keehoo.rule.dto.UserInputDTO;
 import com.keehoo.rule.dto.UserOutputDTO;
 import com.keehoo.rule.entity.Student;
@@ -17,11 +18,11 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class UserController {
     @PostMapping
-    public UserOutputDTO addUser(@RequestBody UserInputDTO userInputDTO){
-        log.info("{}", userInputDTO);
+    public ApiResult<UserOutputDTO> addUser(@RequestBody UserInputDTO userInputDTO){
         User user = userInputDTO.convertToUser();
         UserOutputDTO userOutputDTO = new UserOutputDTO().convertFor(user);
-        return userOutputDTO;
+        ApiResult<UserOutputDTO> apiResult = new ApiResult<>(userOutputDTO);
+        return apiResult;
     }
 
     @GetMapping
