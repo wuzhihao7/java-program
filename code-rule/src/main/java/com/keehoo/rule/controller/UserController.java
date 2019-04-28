@@ -26,8 +26,9 @@ public class UserController {
     }
 
     @GetMapping
-    public Student getStudent(){
-        return Student.of("keehoo").setId(1).setAge(12);
+    public ApiResult<Student> getStudent(){
+        Student student = Student.of("keehoo").setId(1).setAge(12);
+        return new ApiResult<>(student);
     }
 
 }
