@@ -1630,32 +1630,25 @@ private long completedTaskCount;   //用来记录已经执行完毕的任务个�
 > execute()方法
 
 ```java
-    public void execute(Runnable var1) {
-        if (var1 == null) {
+    public void execute(Runnable command) {
+        if (command == null)
             throw new NullPointerException();
-        } else {
-            int var2 = this.ctl.get();
-            if (workerCountOf(var2) < this.corePoolSize) {
-                if (this.addWorker(var1, true)) {
-                    return;
-                }
-
-                var2 = this.ctl.get();
-            }
-
-            if (isRunning(var2) && this.workQueue.offer(var1)) {
-                int var3 = this.ctl.get();
-                if (!isRunning(var3) && this.remove(var1)) {
-                    this.reject(var1);
-                } else if (workerCountOf(var3) == 0) {
-                    this.addWorker((Runnable)null, false);
-                }
-            } else if (!this.addWorker(var1, false)) {
-                this.reject(var1);
-            }
-
+        int c = ctl.get();
+        if (workerCountOf(c) < corePoolSize) {
+            if (addWorker(command, true))
+                return;
+            c = ctl.get();
         }
+        if (isRunning(c) && workQueue.offer(command)) {
+            int recheck = ctl.get();
+            if (! isRunning(recheck) && remove(command))
+                reject(command);
+            else if (workerCountOf(recheck) == 0)
+                addWorker(null, false);
+        }
+        else if (!addWorker(command, false))
+            reject(command);
     }
-
 ```
 
+1. 
