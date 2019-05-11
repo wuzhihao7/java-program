@@ -1,6 +1,6 @@
 package com.keehoo.singleton.cas;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicMarkableReference;
 
 /**
  * @author wuzhihao
@@ -8,19 +8,19 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 2019/4/22
  */
 public class CasSingleton {
-    private static final AtomicReference<CasSingleton> INSTANCE = new AtomicReference<>();
+    private static final AtomicMarkableReference<CasSingleton> INSTANCE = new AtomicMarkableReference<>(null, false);
 
     private CasSingleton(){
     }
 
     public static CasSingleton getInstance(){
         while (true){
-            CasSingleton casSingleton = INSTANCE.get();
+            CasSingleton casSingleton = INSTANCE.getReference();
             if(casSingleton != null){
                 return casSingleton;
             }
             casSingleton = new CasSingleton();
-            if(INSTANCE.compareAndSet(null, casSingleton)){
+            if(INSTANCE.compareAndSet(null, casSingleton, false, true)){
                 return casSingleton;
             }
         }
