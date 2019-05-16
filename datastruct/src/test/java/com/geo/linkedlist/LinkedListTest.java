@@ -11,7 +11,7 @@ public class LinkedListTest {
     @Test
     public void test(){
         LinkedList linkedList = new LinkedList();
-        linkedList.insertFirst(new Node(1, null));
+        linkedList.insertFirst(new Node(1));
         linkedList.display();
         linkedList.find(1).display();
         linkedList.delete(1).display();

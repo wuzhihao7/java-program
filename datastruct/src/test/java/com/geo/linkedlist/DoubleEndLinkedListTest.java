@@ -19,9 +19,9 @@ public class DoubleEndLinkedListTest {
             System.err.println(e.getMessage());
         }
         System.out.println(doubleEndLinkedList.isEmpty());
-        doubleEndLinkedList.insertFirst(new Node(1, null));
+        doubleEndLinkedList.insertFirst(new Node(1));
         doubleEndLinkedList.display();
-        doubleEndLinkedList.insertLast(new Node(2, null));
+        doubleEndLinkedList.insertLast(new Node(2));
         doubleEndLinkedList.display();
         System.out.println(doubleEndLinkedList.deleteFirst());
         doubleEndLinkedList.display();
