@@ -15,6 +15,6 @@ public class Node {
     }
 
     public void display(){
-        System.out.println("data: "+data);
+        System.out.print("data: "+data);
     }
 }
