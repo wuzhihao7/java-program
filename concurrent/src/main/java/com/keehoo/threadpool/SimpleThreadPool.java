@@ -20,6 +20,18 @@ public class SimpleThreadPool extends Thread{
      */
     private int queueSize;
     /**
+     * 最小线程
+     */
+    private int minSize;
+    /**
+     * 最大线程
+     */
+    private int maxSize;
+    /**
+     * 活跃线程
+     */
+    private int activeSize;
+    /**
      * 拒绝策略
      */
     private DiscardPolicy discardPolicy;
@@ -69,18 +81,6 @@ public class SimpleThreadPool extends Thread{
     private static final DiscardPolicy DEFAULT_DISCARD_POLICY = () -> {
         throw new DiscardException("[拒绝执行] - [任务队列溢出...]");
     };
-    /**
-     * 最小线程
-     */
-    private int minSize;
-    /**
-     * 最大线程
-     */
-    private int maxSize;
-    /**
-     * 活跃线程
-     */
-    private int activeSize;
 
     /**
      * 任务线程状态枚举
