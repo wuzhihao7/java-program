@@ -1,5 +1,6 @@
 package com.keehoo.threadpool;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.IntStream;
 
 /**
@@ -9,17 +10,19 @@ import java.util.stream.IntStream;
  */
 public class SimpleThreadPoolTest {
     public static void main(String[] args) throws InterruptedException {
+        final CountDownLatch start = new CountDownLatch(1);
+        final CountDownLatch end = new CountDownLatch(300);
         SimpleThreadPool executor = new SimpleThreadPool();
-        IntStream.range(0, 10).forEach(i ->
-                executor.submit(() -> {
-                    System.out.printf("[线程] - [%s] 开始工作...\n", Thread.currentThread().getName());
+        IntStream.range(0, 1000).forEach(i -> {
                     try {
-                        Thread.sleep(2_000L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        executor.submit(() -> {
+                            System.out.printf("[线程] - [%s] 开始工作...\n", Thread.currentThread().getName());
+                            System.out.printf("[线程] - [%s] 工作完毕...\n", Thread.currentThread().getName());
+                        });
+                    } catch (SimpleThreadPool.DiscardException e) {
+                        System.err.println(e.getMessage());
                     }
-                    System.out.printf("[线程] - [%s] 工作完毕...\n", Thread.currentThread().getName());
-                })
+                }
         );
         //如果放开注释即会执行完所有任务关闭线程池
         executor.shutdown();

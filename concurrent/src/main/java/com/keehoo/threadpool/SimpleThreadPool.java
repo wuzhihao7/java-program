@@ -107,7 +107,7 @@ public class SimpleThreadPool extends Thread{
     /**
      * 拒绝策略
      */
-    private static class DiscardException extends RuntimeException{
+    public static class DiscardException extends RuntimeException{
         DiscardException(String message){
             super(message);
         }
