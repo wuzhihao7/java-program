@@ -11,55 +11,104 @@ import java.util.List;
  * @since 2019/5/18
  */
 public class SimpleThreadPool extends Thread{
-    //线程池大小
+    /**
+     * 线程池大小
+     */
     private int threadPoolSize;
-    //最大接受任务
+    /**
+     * 最大接受任务
+     */
     private int queueSize;
-    //拒绝策略
+    /**
+     * 拒绝策略
+     */
     private DiscardPolicy discardPolicy;
-    //是否被销毁
+    /**
+     * 是否被销毁
+     */
     private volatile boolean destroy = false;
-    //默认最小线程树
+    /**
+     * 默认最小线程树
+     */
     private static final int DEFAULT_MIN_THREAD_SIZE = 2;
-    //活跃线程
+    /**
+     * 活跃线程
+     */
     private static final int DEFAULT_ACTIVE_THREAD_SIZE = 5;
-    //最大线程
+    /**
+     * 最大线程
+     */
     private static final int DEFAULT_MAX_THREAD_SIZE = 10;
-    //最多执行多少个任务
+    /**
+     * 最多执行多少个任务
+     */
     private static final int DEFAULT_WORKER_QUEUE_SIZE = 100;
-    //线程名称前缀
+    /**
+     * 线程名称前缀
+     */
     private static final String THREAD_NAME_PREFIX = "MY-THREAD-NAME-";
-    //线程组的名称
+    /**
+     * 线程组的名称
+     */
     private static final String THREAD_POOL_NAME = "SIMPLE-POOL";
-    //线程组
+    /**
+     * 线程组
+     */
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup(THREAD_POOL_NAME);
-    //线程容器
+    /**
+     * 线程容器
+     */
     private static final List<WorkerTask> WORKER_TASKS = new ArrayList<>();
-    //任务队列容器,也可以用Queue<Runnable> 遵循 FIFO 规则
+    /**
+     * 任务队列容器,也可以用Queue<Runnable> 遵循 FIFO 规则
+     */
     private static final LinkedList<Runnable> TASK_QUEUE = new LinkedList<>();
-    // 拒绝策略
+    /**
+     * 拒绝策略
+     */
     private static final DiscardPolicy DEFAULT_DISCARD_POLICY = () -> {
         throw new DiscardException("[拒绝执行] - [任务队列溢出...]");
     };
-    //最小线程
+    /**
+     * 最小线程
+     */
     private int minSize;
-    //最大线程
+    /**
+     * 最大线程
+     */
     private int maxSize;
-    //活跃线程
+    /**
+     * 活跃线程
+     */
     private int activeSize;
 
     /**
      * 任务线程状态枚举
      */
     private enum TaskState{
-        FREE, RUNNABLE, BLOCKED, TERMINATED;
+        /**
+         * 空闲
+         */
+        FREE,
+        /**
+         * 运行中
+         */
+        RUNNABLE,
+        /**
+         * 阻塞
+         */
+        BLOCKED,
+        /**
+         * 结束
+         */
+        TERMINATED
     }
 
     /**
      * 拒绝策略
      */
     private static class DiscardException extends RuntimeException{
-        public DiscardException(String message){
+        DiscardException(String message){
             super(message);
         }
     }
@@ -68,6 +117,9 @@ public class SimpleThreadPool extends Thread{
      * 拒绝策略接口
      */
     private interface DiscardPolicy{
+        /**
+         * 拒绝
+         */
         void discard();
     }
 
@@ -75,16 +127,20 @@ public class SimpleThreadPool extends Thread{
      * 任务线程具体实现
      */
     private static class WorkerTask extends Thread{
-        //线程状态
+        /**
+         * 线程状态
+         */
         private TaskState taskState;
-        //线程编号
+        /**
+         * 线程编号
+         */
         private static int threadInitNumber;
 
         private static synchronized String nextThreadName(){
             return THREAD_NAME_PREFIX + (++threadInitNumber);
         }
 
-        public WorkerTask(){
+        WorkerTask(){
             super(THREAD_GROUP, nextThreadName());
         }
 
@@ -119,17 +175,17 @@ public class SimpleThreadPool extends Thread{
         /**
          * 优雅关闭线程
          */
-        public void close(){
+        void close(){
             this.taskState = TaskState.TERMINATED;
             this.interrupt();
         }
     }
 
-    public SimpleThreadPool() {
+    SimpleThreadPool() {
         this(DEFAULT_MIN_THREAD_SIZE, DEFAULT_ACTIVE_THREAD_SIZE, DEFAULT_MAX_THREAD_SIZE, DEFAULT_WORKER_QUEUE_SIZE, DEFAULT_DISCARD_POLICY);
     }
 
-    public SimpleThreadPool(int minSize, int activeSize, int maxSize, int queueSize, DiscardPolicy discardPolicy){
+    SimpleThreadPool(int minSize, int activeSize, int maxSize, int queueSize, DiscardPolicy discardPolicy){
         this.minSize = minSize;
         this.activeSize = activeSize;
         this.maxSize = maxSize;
@@ -158,7 +214,7 @@ public class SimpleThreadPool extends Thread{
         task.start();
     }
 
-    public void submit(Runnable runnable) {
+    void submit(Runnable runnable) {
         if (destroy) {
             throw new IllegalStateException("线程池已销毁...");
         }
@@ -174,7 +230,7 @@ public class SimpleThreadPool extends Thread{
         }
     }
 
-    public void shutdown() throws InterruptedException {
+    void shutdown() throws InterruptedException {
         int activeCount = THREAD_GROUP.activeCount();
         while (!TASK_QUEUE.isEmpty() && activeCount > 0) {
             // 如果还有任务,那就休息一会
