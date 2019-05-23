@@ -1,4 +1,4 @@
-package com.keehoo.rule.entity;
+package com.keehoo.rule.pojo.entity;
 
 import lombok.*;
 import lombok.experimental.Accessors;

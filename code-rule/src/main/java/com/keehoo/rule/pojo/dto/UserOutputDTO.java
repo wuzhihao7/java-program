@@ -1,7 +1,7 @@
-package com.keehoo.rule.dto;
+package com.keehoo.rule.pojo.dto;
 
 import com.keehoo.rule.converter.Converter;
-import com.keehoo.rule.entity.User;
+import com.keehoo.rule.pojo.entity.User;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 

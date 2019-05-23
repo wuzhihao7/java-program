@@ -1,10 +1,10 @@
 package com.keehoo.rule.controller;
 
-import com.keehoo.rule.dto.ApiResult;
-import com.keehoo.rule.dto.UserInputDTO;
-import com.keehoo.rule.dto.UserOutputDTO;
-import com.keehoo.rule.entity.Student;
-import com.keehoo.rule.entity.User;
+import com.keehoo.rule.pojo.vo.ApiResult;
+import com.keehoo.rule.pojo.dto.UserInputDTO;
+import com.keehoo.rule.pojo.dto.UserOutputDTO;
+import com.keehoo.rule.pojo.entity.Student;
+import com.keehoo.rule.pojo.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
