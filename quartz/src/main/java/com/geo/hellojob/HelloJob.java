@@ -3,6 +3,7 @@ package com.geo.hellojob;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.SchedulerException;
 
 import java.time.LocalDateTime;
 
@@ -18,5 +19,12 @@ public class HelloJob implements Job {
         LocalDateTime now = LocalDateTime.now();
         System.out.println("now: " + now);
         System.out.println("Hello Quartz");
+        try {
+            System.out.println(context.getScheduler().getCurrentlyExecutingJobs());
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+        System.out.println(context.getJobDetail());
+        System.out.println(context.getTrigger());
     }
 }
