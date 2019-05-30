@@ -10,14 +10,13 @@ import org.quartz.impl.StdSchedulerFactory;
  */
 public class CronScheduler {
     public static void main(String[] args) throws SchedulerException {
-        JobDetail cronJob = JobBuilder.newJob(HelloJob.class).withIdentity("cronJob").build();
-
-        CronTrigger cronTrigger = TriggerBuilder.newTrigger().withIdentity("cronTrigger")
-                .withSchedule(CronScheduleBuilder.cronSchedule("* * * * * ? *")).build();
-
         StdSchedulerFactory factory = new StdSchedulerFactory();
         Scheduler scheduler = factory.getScheduler();
         scheduler.start();
+
+        JobDetail cronJob = JobBuilder.newJob(HelloJob.class).withIdentity("cronJob").build();
+        CronTrigger cronTrigger = TriggerBuilder.newTrigger().withIdentity("cronTrigger")
+                .withSchedule(CronScheduleBuilder.cronSchedule("* * * * * ? *")).build();
         scheduler.scheduleJob(cronJob, cronTrigger);
     }
 }
