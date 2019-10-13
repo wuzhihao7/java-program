@@ -1,6 +1,5 @@
-package com.keehoo.completablefuture;
+package com.keehoo.completablefuture.demo1;
 
-import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
