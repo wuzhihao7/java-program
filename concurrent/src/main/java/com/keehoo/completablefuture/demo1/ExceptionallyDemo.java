@@ -26,8 +26,8 @@ public class ExceptionallyDemo {
                 e.printStackTrace();
             }
             System.out.println("2执行");
-            throw new RuntimeException("2");
-//            return 2;
+//            throw new RuntimeException("2");
+            return 2;
         });
         CompletableFuture<Integer> three = CompletableFuture.supplyAsync(() -> {
             try {
@@ -52,7 +52,8 @@ public class ExceptionallyDemo {
 //        });
 //        System.out.println("main");
 //        four.join();
-        CompletableFuture.allOf(one, two, three).exceptionally(e-> null).join();
+        CompletableFuture<Void> voidCompletableFuture = two.thenRunAsync(() -> System.out.println("123123"));
+        CompletableFuture.allOf(one, two, three,voidCompletableFuture).exceptionally(e-> null).join();
         System.out.println(one.isCompletedExceptionally());
         System.out.println(two.isCompletedExceptionally());
         System.out.println(three.isCompletedExceptionally());

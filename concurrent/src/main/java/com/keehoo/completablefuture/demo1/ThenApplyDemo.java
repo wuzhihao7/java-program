@@ -27,6 +27,7 @@ public class ThenApplyDemo {
 
         // Attach a callback to the Future using thenApply()
         CompletableFuture<String> greetingFuture = whatsYourNameFuture.thenApply(name -> {
+            System.out.println("whatsYourNameFuture");
             return "Hello " + name;
         });
 
