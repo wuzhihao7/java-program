@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class HelloJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        System.out.println("=============================job start==============================");
         LocalDateTime now = LocalDateTime.now();
         System.out.println("now: " + now);
         System.out.println("Hello Quartz");
@@ -26,5 +27,12 @@ public class HelloJob implements Job {
         }
         System.out.println(context.getJobDetail());
         System.out.println(context.getTrigger());
+        try {
+            System.out.println(context.getScheduler().getSchedulerInstanceId());
+            System.out.println(context.getScheduler().getSchedulerName());
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+        System.out.println("=============================job end==============================");
     }
 }
