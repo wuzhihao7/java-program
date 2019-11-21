@@ -13,5 +13,6 @@ repositories {
 
 dependencies {
     implementation 'redis.clients:jedis:3.1.0'
+    implementation 'de.ruedigermoeller:fst:2.57'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

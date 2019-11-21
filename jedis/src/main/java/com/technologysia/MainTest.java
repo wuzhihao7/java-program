@@ -3,9 +3,12 @@ package com.technologysia;
 import redis.clients.jedis.*;
 import redis.clients.jedis.util.JedisClusterCRC16;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainTest {
     public static void main(String[] args) throws IOException {
@@ -62,14 +65,24 @@ public class MainTest {
         }
         //调用Jedis pipeline进行单点批量写入
         for (JedisPool jedisPool : poolKeys.keySet()) {
-            Jedis jedis = jedisPool.getResource();
-            Pipeline pipeline = jedis.pipelined();
-            List<String> keys = poolKeys.get(jedisPool);
-            for(int i=0;i<keys.size();i++){
-                pipeline.setex(keys.get(i),100, "value" + i);
-            }
-            pipeline.sync();//同步提交
-            jedis.close();
+           try(Jedis jedis = jedisPool.getResource();){
+               Pipeline pipeline = jedis.pipelined();
+               List<String> keys = poolKeys.get(jedisPool);
+               for(int i=0;i<keys.size();i++){
+                   pipeline.setex(keys.get(i).getBytes(StandardCharsets.UTF_8),100, FstSerializerUtil.serialize(new Person()));
+               }
+               pipeline.sync();//同步提交
+               Pipeline pipelined = jedis.pipelined();
+               List<Response<byte[]>> collect = keys.stream().map(key -> pipeline.get(key.getBytes(StandardCharsets.UTF_8))).collect(Collectors.toList());
+               pipeline.sync();
+               List<Person> collect1 = collect.stream().map(response -> {
+                   byte[] bytes = response.get();
+                   return FstSerializerUtil.<Person>deserialize(bytes);
+               }).collect(Collectors.toList());
+               System.out.println(collect1);
+           }catch (Exception e){
+               e.printStackTrace();
+           }
         }
         System.out.println("JedisCluster Pipeline total time:"+(System.currentTimeMillis() - start));
     }
