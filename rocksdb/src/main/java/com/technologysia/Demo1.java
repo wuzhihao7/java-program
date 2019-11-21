@@ -7,20 +7,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 public class Demo1 {
-    public static void main(String[] args) {
-        // the Options class contains a set of configurable DB options
-        // that determines the behaviour of the database.
-        try(final Options options = new Options().setCreateIfMissing(true)) {
-            // a factory method that returns a RocksDB instance
-            try(final RocksDB db = RocksDB.open(options, "rocksdb_data")){
-                db.put("hello".getBytes(), "world".getBytes());
-                byte[] bytes = db.get("hello".getBytes());
-                System.out.println(new String(bytes));
-            }
-        }catch (RocksDBException e){
-            e.printStackTrace();
-        }
+    public static void main(String[] args) throws RocksDBException {
+        ExecutorService executorService = Executors.newFixedThreadPool(1000);
+        final Options options = new Options().setCreateIfMissing(true);
+        final RocksDB db = RocksDB.open(options, "rocksdb_data");
+        IntStream.range(0, 10000).forEach(i -> {
+            executorService.execute(()->{
+                try {
+                    db.put(("hello"+i).getBytes(), ("world"+i).getBytes());
+                    byte[] bytes = db.get(("hello"+i).getBytes());
+                    System.out.println(new String(bytes));
+                } catch (RocksDBException e) {
+                    e.printStackTrace();
+                }
+            });
+        });
+        executorService.shutdown();
     }
 }
