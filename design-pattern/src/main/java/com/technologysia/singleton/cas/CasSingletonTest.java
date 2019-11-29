@@ -1,4 +1,4 @@
-package com.keehoo.singleton.cas;
+package com.technologysia.singleton.cas;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;

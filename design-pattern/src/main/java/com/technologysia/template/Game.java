@@ -1,4 +1,4 @@
-package com.keehoo.template;
+package com.technologysia.template;
 
 /**
  * @author wuzhihao

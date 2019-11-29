@@ -4,7 +4,7 @@ callback是一种常见的设计模式，在这种模式中，可以指定在某
 > 定义接口
 
 ```java
-package com.keehoo.callback;
+package com.technologysia.callback;
 
 /**
  * @author wuzhihao
@@ -20,7 +20,7 @@ public interface IScore {
 > 创建Teacher类并实现接口
 
 ```java
-package com.keehoo.callback;
+package com.technologysia.callback;
 
 /**
  * @author wuzhihao
@@ -55,7 +55,7 @@ public class Teacher implements IScore {
 > 创建Student类
 
 ```java
-package com.keehoo.callback;
+package com.technologysia.callback;
 
 /**
  * @author wuzhihao
@@ -88,7 +88,7 @@ public class Student {
 > 测试
 
 ```java
-package com.keehoo.callback;
+package com.technologysia.callback;
 
 /**
  * @author wuzhihao
