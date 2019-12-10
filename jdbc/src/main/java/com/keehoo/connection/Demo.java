@@ -1,4 +1,4 @@
-package com.keehoo.connection;
+package com.technologysia.connection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

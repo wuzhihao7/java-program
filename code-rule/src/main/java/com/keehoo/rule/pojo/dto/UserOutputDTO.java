@@ -1,7 +1,7 @@
-package com.keehoo.rule.pojo.dto;
+package com.technologysia.rule.pojo.dto;
 
-import com.keehoo.rule.converter.Converter;
-import com.keehoo.rule.pojo.entity.User;
+import com.technologysia.rule.converter.Converter;
+import com.technologysia.rule.pojo.entity.User;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 

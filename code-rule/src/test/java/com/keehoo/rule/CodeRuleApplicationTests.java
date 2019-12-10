@@ -1,4 +1,4 @@
-package com.keehoo.rule;
+package com.technologysia.rule;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

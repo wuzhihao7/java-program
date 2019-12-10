@@ -1,8 +1,8 @@
-package com.keehoo.rpc;
+package com.technologysia.rpc;
 
 import com.alibaba.fastjson.JSONObject;
-import com.keehoo.rpc.dto.RpcRequest;
-import com.keehoo.rpc.dto.RpcResponse;
+import com.technologysia.rpc.dto.RpcRequest;
+import com.technologysia.rpc.dto.RpcResponse;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

@@ -1,4 +1,4 @@
-package com.keehoo.rpc.dto;
+package com.technologysia.rpc.dto;
 
 import lombok.Data;
 

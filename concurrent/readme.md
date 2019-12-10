@@ -18,7 +18,7 @@
 3. 实现Callable接口
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 import java.util.concurrent.*;
 
@@ -136,7 +136,7 @@ public class CreateThreadDemo {
 | public static boolean interrupted() | 当前线程是否被中断                                 | 中断标志位会被清除                                           |
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 import java.util.stream.IntStream;
 
@@ -288,7 +288,7 @@ public final void join() throws InterruptedException
 ```
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 /**
  * @author wuzhihao
@@ -334,7 +334,7 @@ public class JoinDemo {
 3. sleep()方法在休眠时间达到后如果再次获得CPU时间片就会继续执行，而wait()方法必须等待Object.notift/Object.notifyAll通知后，才会离开等待池，并且再次获得CPU时间片才会继续执行。
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 /**
  * @author wuzhihao
@@ -382,7 +382,7 @@ public class SleepDemo {
 注意，调用yield方法并不会让线程进入阻塞状态，而是让线程重回就绪状态，它只需要等待重新获取CPU执行时间，这一点是和sleep方法不一样的。
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 import java.util.stream.IntStream;
 
@@ -442,7 +442,7 @@ public class YieldDemo {
 这样的异常，但是该线程还是会执行，只不过会当做正常的用户线程执行。
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 import java.util.stream.IntStream;
 
@@ -806,7 +806,7 @@ final经常会被用作不变类上，利用final的不可更改性。
 ### final为基本类型
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 /**
  * @author wuzhihao
@@ -1078,7 +1078,7 @@ ReentrantLock，意思是“可重入锁”。ReentrantLock是唯一实现了Loc
 如果采用Lock，必须主动去释放锁，并且在发生异常时，不会自动释放锁。因此一般来说，使用Lock必须在try{}catch{}块中进行，并且将释放锁的操作放在finally块中进行，以保证锁一定被被释放，防止死锁的发生。通常使用Lock来进行同步的话，是以下面这种形式去使用的：
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
@@ -1137,7 +1137,7 @@ public class ReentrantLockDemo {
 所以，一般情况下通过tryLock来获取锁时是这样使用的：
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1186,7 +1186,7 @@ public class TryLockDemo extends Thread {
 由于lockInterruptibly()的声明中抛出了异常，所以lock.lockInterruptibly()必须放在try块中或者在调用lockInterruptibly()的方法外声明抛出InterruptedException。因此lockInterruptibly()一般的使用形式如下：
 
 ```java
-package com.keehoo.thread;
+package com.technologysia.thread;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1286,7 +1286,7 @@ ReentrantReadWriteLock里面提供了很多丰富的方法，不过最主要的�
 **如果有一个线程已经占用了写锁，则此时其他线程如果申请写锁或者读锁，则申请的线程会一直等待释放写锁。**
 
 ```java
-package com.keehoo.thread.readwritelock;
+package com.technologysia.thread.readwritelock;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.IntStream;

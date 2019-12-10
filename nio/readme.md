@@ -334,7 +334,7 @@ FileChannel常用方法：
 > 文件拷贝
 
 ```java
-package com.keehoo.channel;
+package com.technologysia.channel;
 
 import org.junit.Test;
 
@@ -550,7 +550,7 @@ ByteBuffer是唯一直接与通道交换的缓冲器。
 ### 示例
 
 ```java
-package com.keehoo.buffer;
+package com.technologysia.buffer;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -650,7 +650,7 @@ public interface GatheringByteChannel extends WritableByteChannel{
 第一个缓冲区保存随机数，第二个缓冲区使用分散/聚集机制保存写入的数据
 
 ```java
-package com.keehoo.buffer.cattergatherio;
+package com.technologysia.buffer.cattergatherio;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -764,7 +764,7 @@ public class Demo {
 从4个不同文件读取文件内容的简单示例，并将它们的组合输出写入到第五个文件：
 
 ```java
-package com.keehoo.channel;
+package com.technologysia.channel;
 
 import org.junit.Before;
 import org.junit.Test;

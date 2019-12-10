@@ -1,4 +1,4 @@
-package com.keehoo.rule.pojo.vo;
+package com.technologysia.rule.pojo.vo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

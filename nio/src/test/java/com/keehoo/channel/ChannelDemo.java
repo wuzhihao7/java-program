@@ -1,4 +1,4 @@
-package com.keehoo.channel;
+package com.technologysia.channel;
 
 import org.junit.Test;
 
