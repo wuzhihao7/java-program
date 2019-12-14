@@ -14,7 +14,7 @@ public class ThreadPoolDemo {
                 .setNameFormat("consumer-queue-thread-%d").build();
 
         ExecutorService pool = new ThreadPoolExecutor(10, 10, 60L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(128),namedThreadFactory,new ThreadPoolExecutor.CallerRunsPolicy());
+                new ArrayBlockingQueue<Runnable>(128),namedThreadFactory,new ThreadPoolExecutor.AbortPolicy());
         System.out.println(Thread.currentThread().getName());
 
         CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(IntStream.range(0, 20).mapToObj(i -> CompletableFuture.runAsync(() -> {
@@ -23,7 +23,7 @@ public class ThreadPoolDemo {
             CompletableFuture<Void> cf1 = CompletableFuture.runAsync(() -> {
                 System.out.println("2_" + i + ":" + Thread.currentThread().getName());
                 try {
-                    TimeUnit.SECONDS.sleep(10);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -32,7 +32,7 @@ public class ThreadPoolDemo {
             CompletableFuture<Void> cf2 = CompletableFuture.runAsync(() -> {
                 System.out.println("3_" + i + ":" + Thread.currentThread().getName());
                 try {
-                    TimeUnit.SECONDS.sleep(10);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -41,7 +41,7 @@ public class ThreadPoolDemo {
             cf1.thenCombineAsync(cf2, (tradeAccountDayMap, accountingAccountDayMap) -> {
                 System.out.println("4_" + i + ":" + Thread.currentThread().getName());
                 try {
-                    TimeUnit.SECONDS.sleep(10);
+                    TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -49,13 +49,13 @@ public class ThreadPoolDemo {
                 return null;
             }, pool).join();
             try {
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println("5_" + i + ":" + Thread.currentThread().getName());
         }, pool)).toArray(CompletableFuture[]::new));
-        voidCompletableFuture.get(120, TimeUnit.SECONDS);
+        voidCompletableFuture.get(60, TimeUnit.SECONDS);
         pool.shutdown();
         while (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
             System.out.println("线程还在执行。。。");
