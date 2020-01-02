@@ -63,7 +63,7 @@ public class Demo {
 
     @Test
     public void test3(){
-        Stream<Student> stream = Stream.of(stuList.toArray(new Student[stuList.size()])).filter(student -> {
+        Stream<Student> stream = Stream.of(stuList.toArray(new Student[0])).filter(student -> {
             System.out.println("in filter");
             return student.getScore() > 85;
         });
