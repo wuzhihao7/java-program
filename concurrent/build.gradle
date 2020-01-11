@@ -5,7 +5,7 @@ plugins {
 group 'com.keehoo'
 version '1.0-SNAPSHOT'
 
-//sourceCompatibility = JavaVersion.VERSION_HIGHER
+sourceCompatibility = JavaVersion.VERSION_11
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 repositories {

@@ -2,9 +2,12 @@ package com.technologysia.completablefuture.demo1;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AsyncDemo {
     public static void main(String[] args) throws IOException {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         CompletableFuture<Integer> f = new CompletableFuture<Integer>();
 
         new Thread(() -> {
@@ -27,7 +30,7 @@ public class AsyncDemo {
         // 哪个线程就负责执行whenComplete的内容。
         // 如果当前线程（主线程）执行到这里的时候，f.complete(100)已经被其他线程执行完毕了。
         // 那么只有当前线程自己来执行whenComplete里面的内容了。
-        f.whenComplete((i, ex) -> {
+        f.whenCompleteAsync((i, ex) -> {
             // 这个场景下，whenComplete的回调的执行线程会是子线程A
             System.out.println("do something after complete begin");
             try {
@@ -37,10 +40,10 @@ public class AsyncDemo {
                 e.printStackTrace();
             }
             System.out.println("do something after complete end");
-        });
+        }, executorService);
 
 
         System.out.println("main over");
-        System.in.read();
+//        System.in.read();
     }
 }

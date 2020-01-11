@@ -47,7 +47,7 @@ public class ThreadPoolDemo {
                 }
 
                 return null;
-            }, pool).join();
+            }, pool).whenComplete((o, throwable) -> System.out.println("内部计算完成"));
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -55,7 +55,8 @@ public class ThreadPoolDemo {
             }
             System.out.println("5_" + i + ":" + Thread.currentThread().getName());
         }, pool)).toArray(CompletableFuture[]::new));
-        voidCompletableFuture.get(60, TimeUnit.SECONDS);
+        voidCompletableFuture.whenCompleteAsync((aVoid, throwable) -> System.out.println("外部计算完成"));
+        voidCompletableFuture.join();
         pool.shutdown();
         while (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
             System.out.println("线程还在执行。。。");
