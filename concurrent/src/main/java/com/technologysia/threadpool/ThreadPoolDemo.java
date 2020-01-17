@@ -14,14 +14,13 @@ public class ThreadPoolDemo {
                 .setNameFormat("consumer-queue-thread-%d").build();
 
         ExecutorService pool = new ThreadPoolExecutor(10, 10, 60L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(128),namedThreadFactory,new ThreadPoolExecutor.AbortPolicy());
-        System.out.println(Thread.currentThread().getName());
+                new ArrayBlockingQueue<>(128),namedThreadFactory,new ThreadPoolExecutor.AbortPolicy());
 
         CompletableFuture<Void> voidCompletableFuture = CompletableFuture.allOf(IntStream.range(0, 20).mapToObj(i -> CompletableFuture.runAsync(() -> {
-            System.out.println("1_" + i + ":" + Thread.currentThread().getName());
+//            System.out.println("1_" + i + ":" + Thread.currentThread().getName());
             //统计交易方发生额
             CompletableFuture<Void> cf1 = CompletableFuture.runAsync(() -> {
-                System.out.println("2_" + i + ":" + Thread.currentThread().getName());
+//                System.out.println("2_" + i + ":" + Thread.currentThread().getName());
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
@@ -30,7 +29,7 @@ public class ThreadPoolDemo {
             }, pool);
             //统计账务方发生额
             CompletableFuture<Void> cf2 = CompletableFuture.runAsync(() -> {
-                System.out.println("3_" + i + ":" + Thread.currentThread().getName());
+//                System.out.println("3_" + i + ":" + Thread.currentThread().getName());
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
@@ -39,7 +38,7 @@ public class ThreadPoolDemo {
             }, pool);
             //交易方和账务方统计完成后，进行合并
             cf1.thenCombineAsync(cf2, (tradeAccountDayMap, accountingAccountDayMap) -> {
-                System.out.println("4_" + i + ":" + Thread.currentThread().getName());
+//                System.out.println("4_" + i + ":" + Thread.currentThread().getName());
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
@@ -47,19 +46,19 @@ public class ThreadPoolDemo {
                 }
 
                 return null;
-            }, pool).whenComplete((o, throwable) -> System.out.println("内部计算完成"));
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("5_" + i + ":" + Thread.currentThread().getName());
+            }, pool).whenComplete((o, throwable) -> {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+//            System.out.println("5_" + i + ":" + Thread.currentThread().getName());
         }, pool)).toArray(CompletableFuture[]::new));
-        voidCompletableFuture.whenCompleteAsync((aVoid, throwable) -> System.out.println("外部计算完成"));
-        voidCompletableFuture.join();
+        voidCompletableFuture.whenCompleteAsync((aVoid, throwable) -> System.out.println("外部计算完成")).join();
+        System.out.println(Thread.currentThread().getName());
         pool.shutdown();
         while (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
-            System.out.println("线程还在执行。。。");
         }
 
     }
