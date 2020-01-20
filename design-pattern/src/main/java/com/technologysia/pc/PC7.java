@@ -2,16 +2,14 @@ package com.technologysia.pc;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.*;
 
 public class PC7 {
-    public static void main(String[] args) {
-        BlockingQueue<String> blockingQueue = new LinkedTransferQueue<>();
+    public static void main(String[] args) throws InterruptedException {
+        BlockingQueue<String> blockingQueue = new ArrayBlockingQueue<>(10);
         DataProducer dataProducer = new DataProducer(blockingQueue);
         new Thread(dataProducer).start();
+        TimeUnit.SECONDS.sleep(1);
         for (int i = 0; i < 4; i++) {
             DataConsumer dataConsumer = new DataConsumer(blockingQueue);
             dataConsumer.addObserver(dataProducer);
