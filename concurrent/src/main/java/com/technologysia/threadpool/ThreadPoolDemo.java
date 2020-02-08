@@ -14,7 +14,7 @@ public class ThreadPoolDemo {
 
         ExecutorService pool = new ThreadPoolExecutor(2, 10, 60L, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(128),namedThreadFactory,new ThreadPoolExecutor.AbortPolicy());
-        new Thread(() -> {
+        Thread monitorExecutor = new Thread(() -> {
             ThreadPoolExecutor tpe = ((ThreadPoolExecutor) pool);
             while (true) {
                 System.out.println();
@@ -37,30 +37,25 @@ public class ThreadPoolDemo {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
 
-        new ThreadStat("主方法", Thread.currentThread()).start();
+        monitorExecutor.setDaemon(true);
+        monitorExecutor.start();
+
+        ThreadStat mainMonitor = new ThreadStat("主方法", Thread.currentThread());
+        mainMonitor.setDaemon(true);
+        mainMonitor.start();
+
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() -> async(pool), pool);
         CompletableFuture<Void> f2 = CompletableFuture.runAsync(() -> async2(pool), pool);
 
         CompletableFuture<Void> all = CompletableFuture.allOf(f1, f2);
         all.join();
 
-
-//        while (true){
-//            if(all.isDone()) break;
-//            try {
-//                TimeUnit.SECONDS.sleep(1);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         System.out.println("全部完成");
 
         pool.shutdown();
         while (!pool.awaitTermination(1, TimeUnit.SECONDS)) {
-            System.out.println("等待...");
         }
 
     }
@@ -141,6 +136,7 @@ class ThreadStat extends Thread{
     public ThreadStat(String trace, Thread thread){
         this.trace = trace;
         this.thread = thread;
+        this.setDaemon(true);
     }
 
     @Override
