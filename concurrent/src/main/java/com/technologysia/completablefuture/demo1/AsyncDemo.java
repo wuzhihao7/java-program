@@ -2,36 +2,24 @@ package com.technologysia.completablefuture.demo1;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class AsyncDemo {
     public static void main(String[] args) throws IOException {
-//        CompletableFuture<Integer> f = new CompletableFuture<>();
+        CompletableFuture<Integer> f = new CompletableFuture<>();
 
-        CompletableFuture<Void> f = CompletableFuture.runAsync(() -> {
-            System.out.println("模拟耗时任务");
+        new Thread(() -> {
+            // 子线程A启动
+            System.out.println("子线程A启动");
             try {
-                TimeUnit.SECONDS.sleep(5);
+                System.out.println("子线程A沉睡5s");
+                Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        });
-
-//        new Thread(() -> {
-//            // 子线程A启动
-//            System.out.println("子线程A启动");
-//            try {
-//                System.out.println("子线程A沉睡5s");
-//                Thread.sleep(5000L);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            System.out.println("子线程A令future完成");
-////            f.complete(100);  // 当子线程A执行到f.complete的时候，会去看是否有注册好的f的then或者when（非async的），如果有的话，会顺次去执行。
-//            System.out.println("子线程A结束");
-//        }).start();
+            System.out.println("子线程A令future完成");
+            f.complete(100);  // 当子线程A执行到f.complete的时候，会去看是否有注册好的f的then或者when（非async的），如果有的话，会顺次去执行。
+            System.out.println("子线程A结束");
+        }).start();
 
 
         // 当前线程（主线程）执行到这里的时候，如果子线程还没有执行到f.complete(100)，
